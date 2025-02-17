@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link as LinkType } from "@shared/schema";
 import { NavigationBar } from "@/components/navigation-bar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { motion } from "framer-motion";
 import { Award, TrendingUp, Users } from "lucide-react";
