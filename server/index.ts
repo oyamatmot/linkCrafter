@@ -116,6 +116,12 @@ app.use((req, res, next) => {
 
   const PORT = 5000;
   server.listen(PORT, "0.0.0.0", () => {
+  process.on('uncaughtException', (error) => {
+    if (error.code === 'EADDRINUSE') {
+      console.log('Port in use, attempting to restart...');
+      process.exit(1); // This will trigger Replit's auto-restart
+    }
+  });
     console.log(
       chalk.bold.cyan("🚀 Server"),
       chalk.green(`running on port ${PORT}`)

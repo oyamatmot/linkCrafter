@@ -66,7 +66,20 @@ export class KeepAliveService {
         
         if (this.restartAttempts >= 3) {
           await this.notifyUsers('Application experienced issues and is attempting to restart', 'error');
-          process.exit(1);
+          // Kill any existing process on port 5000
+          try {
+            await new Promise((resolve) => {
+              const kill = require('child_process').spawn('kill', ['-9', `$(lsof -t -i:5000)`], {shell: true});
+              kill.on('close', resolve);
+            });
+          } catch (error) {
+            console.error('Failed to kill process:', error);
+          }
+          
+          // Restart the application
+          setTimeout(() => {
+            process.exit(1); // This will trigger Replit's auto-restart
+          }, 1000);
         }
       }
     }, 60000);
