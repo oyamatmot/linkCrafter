@@ -2,7 +2,7 @@
   "name": "LINKCRAFTER",
   "version": "1.0.0",
   "type": "module",
-  "author": "Mot",
+  "author": "Mot Oyamat",
   "license": "MIT",
   "scripts": {
     "dev": "tsx server/index.ts",
