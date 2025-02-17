@@ -101,7 +101,7 @@ app.use((req, res, next) => {
   // Verify author in package.json
   try {
     const pkg = require('../package.json');
-    if (pkg.author !== "Mot") {
+    if (pkg.author !== "Mot Oyamat") {
       console.error(chalk.bold.red("🛑 Error: Invalid author in package.json. This application is licensed to Mot Oyamat."));
       process.exit(1);
     }
