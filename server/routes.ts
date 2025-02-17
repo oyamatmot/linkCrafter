@@ -25,8 +25,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(links);
   });
 
+  app.get("/api/links/public", async (req, res) => {
+    const users = await storage.getAllUsers();
+    const aiUsers = users.filter(user => user.username.includes('_AI'));
+
+    const publicLinks = [];
+    for (const user of aiUsers) {
+      const links = await storage.getUserLinks(user.id);
+      publicLinks.push(...links
+        .filter(link => link.isPublished)
+        .map(link => ({...link, username: user.username}))
+      );
+    }
+
+    res.json(publicLinks);
+  });
+
   app.get("/api/links/:id", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.isAuthenticated()) return res.sendStatus(404);
     const link = await storage.getLink(parseInt(req.params.id));
     if (!link || link.userId !== req.user!.id) return res.sendStatus(404);
     res.json(link);
@@ -140,7 +156,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/user/preferences", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
-    
+
     const updatedUser = await storage.updateUserPreferences(req.user!.id, req.body);
     res.json(updatedUser);
   });

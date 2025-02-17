@@ -16,6 +16,10 @@ export default function Analytics() {
     queryKey: ["/api/leaderboard"],
   });
 
+  const { data: publicLinks = [] } = useQuery<LinkType[]>({
+    queryKey: ["/api/links/public"],
+  });
+
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0 md:pt-16">
       <NavigationBar />
@@ -126,6 +130,44 @@ export default function Analytics() {
                     </div>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            className="mt-8"
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle>Public AI Links</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>User</TableHead>
+                      <TableHead>Link</TableHead>
+                      <TableHead>Clicks</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {publicLinks.map((link) => (
+                      <TableRow key={link.id}>
+                        <TableCell>{link.username}</TableCell>
+                        <TableCell>
+                          <a href={link.originalUrl} target="_blank" rel="noopener noreferrer" 
+                             className="text-primary hover:underline">
+                            {link.originalUrl}
+                          </a>
+                        </TableCell>
+                        <TableCell>{link.clicks || 0}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
           </motion.div>
