@@ -138,6 +138,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(recommendations);
   });
 
+  app.patch("/api/user/preferences", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    const updatedUser = await storage.updateUserPreferences(req.user!.id, req.body);
+    res.json(updatedUser);
+  });
+
   app.get("/api/leaderboard", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
 

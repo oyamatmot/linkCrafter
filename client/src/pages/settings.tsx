@@ -33,13 +33,32 @@ export default function SettingsPage() {
     },
   });
 
-  const handlePreferenceChange = (key: string, value: boolean | string) => {
+  const handlePreferenceChange = async (key: string, value: boolean | string) => {
     if (!user?.preferences) return;
 
     const newPreferences = {
       ...user.preferences,
       [key]: value,
     };
+
+    // Immediately update local state
+    queryClient.setQueryData(["/api/user"], (oldData: any) => ({
+      ...oldData,
+      preferences: newPreferences,
+    }));
+
+    try {
+      await updatePreferencesMutation.mutateAsync(newPreferences);
+      if (key === "darkMode") {
+        setTheme(value ? "dark" : "light");
+      }
+    } catch (error) {
+      // Revert on failure
+      queryClient.setQueryData(["/api/user"], (oldData: any) => ({
+        ...oldData,
+        preferences: user.preferences,
+      }));
+    }
 
     // Update locally first for immediate feedback
     queryClient.setQueryData(["/api/user"], (oldData: any) => ({
