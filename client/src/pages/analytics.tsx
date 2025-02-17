@@ -18,6 +18,7 @@ export default function Analytics() {
   const { data: publicLinks = [] } = useQuery<(LinkType & { username: string })[]>({
     queryKey: ["/api/links/public"],
     refetchInterval: 30000,
+    select: (data) => data.filter(link => link.username.startsWith('AI_')),
   });
 
   const { data: leaderboard = [] } = useQuery<{ username: string; totalClicks: number; isAI: boolean }[]>({
