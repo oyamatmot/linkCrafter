@@ -1,11 +1,27 @@
-import { pgTable, text, serial, integer, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, timestamp, boolean, json } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
+  email: text("email"),
+  isAi: boolean("is_ai").default(false),
+  preferences: json("preferences").$type<{
+    darkMode: boolean;
+    notifications: boolean;
+    smartSearch: boolean;
+    selfMonitoring: boolean;
+    defaultCustomDomain?: string;
+  }>().default({
+    darkMode: false,
+    notifications: false,
+    smartSearch: true,
+    selfMonitoring: true,
+  }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const links = pgTable("links", {
@@ -14,9 +30,10 @@ export const links = pgTable("links", {
   originalUrl: text("original_url").notNull(),
   shortCode: text("short_code").notNull().unique(),
   customDomain: text("custom_domain"),
-  title: text("title"),
+  hasPassword: boolean("has_password").default(false),
   password: text("password"),
   isPublished: boolean("is_published").default(true).notNull(),
+  category: text("category"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -28,26 +45,56 @@ export const clicks = pgTable("clicks", {
   ipAddress: text("ip_address"),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
+export const recentSearches = pgTable("recent_searches", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  query: text("query").notNull(),
+  searchType: text("search_type").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+// Relations
+export const usersRelations = relations(users, ({ many }) => ({
+  links: many(links),
+  searches: many(recentSearches),
+}));
+
+export const linksRelations = relations(links, ({ one, many }) => ({
+  user: one(users, {
+    fields: [links.userId],
+    references: [users.id],
+  }),
+  clicks: many(clicks),
+}));
+
+// Schemas for insert operations
+export const insertUserSchema = createInsertSchema(users)
+  .pick({
+    username: true,
+    password: true,
+    email: true,
+    preferences: true,
+  })
+  .extend({
+    email: z.string().email("Invalid email").optional(),
+  });
 
 export const insertLinkSchema = createInsertSchema(links)
   .pick({
     originalUrl: true,
-    title: true,
+    hasPassword: true,
     password: true,
     isPublished: true,
     customDomain: true,
+    category: true,
   })
   .extend({
     originalUrl: z.string().url("Please enter a valid URL"),
-    title: z.string().min(1, "Title is required").max(100).optional(),
-    password: z.string().min(6, "Password must be at least 6 characters").max(100).optional(),
+    password: z.string().min(6, "Password must be at least 6 characters").optional(),
     customDomain: z.string().regex(/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/, {
       message: "Please enter a valid domain name",
     }).optional(),
+    category: z.string().optional(),
   });
 
 export const insertClickSchema = createInsertSchema(clicks).pick({
@@ -56,9 +103,11 @@ export const insertClickSchema = createInsertSchema(clicks).pick({
   ipAddress: true,
 });
 
+// Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertLink = z.infer<typeof insertLinkSchema>;
 export type InsertClick = z.infer<typeof insertClickSchema>;
 export type User = typeof users.$inferSelect;
 export type Link = typeof links.$inferSelect;
 export type Click = typeof clicks.$inferSelect;
+export type RecentSearch = typeof recentSearches.$inferSelect;

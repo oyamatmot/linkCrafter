@@ -8,11 +8,47 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/use-auth";
 import { Bell, Moon, Sun, Globe, Smartphone, Search, Book, Activity } from "lucide-react";
 import { TutorialOverlay } from "@/components/tutorial-overlay";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useTheme } from "@/hooks/use-theme";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { Loader2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+
 
 export default function SettingsPage() {
   const { user } = useAuth();
   const [showTutorial, setShowTutorial] = useState(false);
+  const { theme, setTheme } = useTheme();
+  const { toast } = useToast();
+
+  const updatePreferencesMutation = useMutation({
+    mutationFn: async (preferences: any) => {
+      const res = await apiRequest("PATCH", "/api/user/preferences", preferences);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      toast({ title: "Settings updated successfully" });
+    },
+  });
+
+  const handlePreferenceChange = (key: string, value: boolean | string) => {
+    if (!user?.preferences) return;
+
+    const newPreferences = {
+      ...user.preferences,
+      [key]: value,
+    };
+
+    updatePreferencesMutation.mutate(newPreferences);
+  };
+
+  useEffect(() => {
+    if (user?.preferences) {
+      setTheme(user.preferences.darkMode ? "dark" : "light");
+    }
+  }, [user?.preferences]);
 
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0 md:pt-16">
@@ -86,7 +122,10 @@ export default function SettingsPage() {
                         </p>
                       </div>
                     </div>
-                    <Switch />
+                    <Switch 
+                      checked={user?.preferences?.smartSearch ?? true}
+                      onCheckedChange={(checked) => handlePreferenceChange("smartSearch", checked)}
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -98,7 +137,10 @@ export default function SettingsPage() {
                         </p>
                       </div>
                     </div>
-                    <Switch />
+                    <Switch 
+                      checked={user?.preferences?.selfMonitoring ?? true}
+                      onCheckedChange={(checked) => handlePreferenceChange("selfMonitoring", checked)}
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -136,7 +178,10 @@ export default function SettingsPage() {
                       <Moon className="h-4 w-4" />
                       <Label>Dark Mode</Label>
                     </div>
-                    <Switch />
+                    <Switch 
+                      checked={user?.preferences?.darkMode ?? false}
+                      onCheckedChange={(checked) => handlePreferenceChange("darkMode", checked)}
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -155,7 +200,10 @@ export default function SettingsPage() {
                       <Bell className="h-4 w-4" />
                       <Label>Notifications</Label>
                     </div>
-                    <Switch />
+                    <Switch 
+                      checked={user?.preferences?.notifications ?? false}
+                      onCheckedChange={(checked) => handlePreferenceChange("notifications", checked)}
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -179,7 +227,12 @@ export default function SettingsPage() {
                       <Globe className="h-4 w-4" />
                       <Label>Default Custom Domain</Label>
                     </div>
-                    <Input placeholder="yourdomain.com" className="max-w-[200px]" />
+                    <Input 
+                      value={user?.preferences?.defaultCustomDomain ?? ""}
+                      onChange={(e) => handlePreferenceChange("defaultCustomDomain", e.target.value)}
+                      placeholder="yourdomain.com"
+                      className="max-w-[200px]"
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <Label>Auto-publish new links</Label>
@@ -190,6 +243,12 @@ export default function SettingsPage() {
             </motion.div>
           </div>
         </motion.div>
+        {updatePreferencesMutation.isPending && (
+          <div className="fixed bottom-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded-md shadow-lg flex items-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Saving changes...
+          </div>
+        )}
       </main>
     </div>
   );

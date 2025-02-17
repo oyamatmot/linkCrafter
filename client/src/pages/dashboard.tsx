@@ -43,11 +43,14 @@ import {
   ExternalLink,
   Copy,
   Globe,
+  Loader2,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { NavigationBar } from "@/components/navigation-bar";
 import { motion } from 'framer-motion';
+import confetti from 'canvas-confetti';
+
 
 export default function Dashboard() {
   const { user, logoutMutation } = useAuth();
@@ -97,10 +100,11 @@ export default function Dashboard() {
     resolver: zodResolver(insertLinkSchema),
     defaultValues: {
       originalUrl: "",
-      title: "",
       password: "",
       customDomain: "",
       isPublished: true,
+      hasPassword: false,
+      category: "",
     },
   });
 
@@ -137,7 +141,17 @@ export default function Dashboard() {
               <DialogHeader>
                 <DialogTitle>Create New Link</DialogTitle>
               </DialogHeader>
-              <form onSubmit={form.handleSubmit((data) => createLinkMutation.mutate(data))}>
+              <form onSubmit={form.handleSubmit((data) => {
+                createLinkMutation.mutate(data);
+                // Show celebration animation on success
+                if (!createLinkMutation.isError) {
+                  confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                  });
+                }
+              })}>
                 <div className="space-y-4">
                   <div>
                     <Label>Original URL</Label>
@@ -147,10 +161,6 @@ export default function Dashboard() {
                         {form.formState.errors.originalUrl.message}
                       </p>
                     )}
-                  </div>
-                  <div>
-                    <Label>Title</Label>
-                    <Input {...form.register("title")} placeholder="My Awesome Link" />
                   </div>
                   <div>
                     <Label>Custom Domain (Optional)</Label>
@@ -164,10 +174,22 @@ export default function Dashboard() {
                       </Button>
                     </div>
                   </div>
-                  <div>
-                    <Label>Password Protection (Optional)</Label>
-                    <Input type="password" {...form.register("password")} />
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={form.watch("hasPassword")}
+                      onCheckedChange={(checked) => {
+                        form.setValue("hasPassword", checked);
+                        if (!checked) form.setValue("password", "");
+                      }}
+                    />
+                    <Label>Password Protected</Label>
                   </div>
+                  {form.watch("hasPassword") && (
+                    <div>
+                      <Label>Password</Label>
+                      <Input type="password" {...form.register("password")} />
+                    </div>
+                  )}
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={form.watch("isPublished")}
@@ -180,7 +202,14 @@ export default function Dashboard() {
                     className="w-full"
                     disabled={createLinkMutation.isPending}
                   >
-                    Create Link
+                    {createLinkMutation.isPending ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Creating...
+                      </span>
+                    ) : (
+                      "Create Link"
+                    )}
                   </Button>
                 </div>
               </form>
@@ -190,11 +219,11 @@ export default function Dashboard() {
 
         <div className="grid gap-6">
           <Card>
-            <CardContent className="p-0 overflow-x-auto">
+            <CardContent className="p-0">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="min-w-[200px]">Title</TableHead>
+                    <TableHead className="min-w-[200px]">URL</TableHead>
                     <TableHead className="min-w-[200px]">Custom Domain</TableHead>
                     <TableHead className="min-w-[150px]">Status</TableHead>
                     <TableHead className="w-[150px]">Actions</TableHead>
@@ -203,7 +232,7 @@ export default function Dashboard() {
                 <TableBody>
                   {links.map((link) => (
                     <TableRow key={link.id}>
-                      <TableCell>{link.title || link.originalUrl}</TableCell>
+                      <TableCell>{link.originalUrl}</TableCell>
                       <TableCell>
                         {link.customDomain ? (
                           <div className="flex items-center gap-2">
@@ -216,7 +245,7 @@ export default function Dashboard() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          {link.password ? (
+                          {link.hasPassword ? (
                             <Lock className="h-4 w-4 text-warning" />
                           ) : (
                             <Unlock className="h-4 w-4 text-success" />
@@ -264,7 +293,6 @@ export default function Dashboard() {
               </Table>
             </CardContent>
           </Card>
-
           {selectedLink && analytics && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -273,7 +301,7 @@ export default function Dashboard() {
             >
               <Card>
                 <CardHeader>
-                  <CardTitle>Analytics for {selectedLink.title || selectedLink.originalUrl}</CardTitle>
+                  <CardTitle>Analytics for {selectedLink.originalUrl}</CardTitle>
                   <CardDescription>Click statistics over time</CardDescription>
                 </CardHeader>
                 <CardContent>

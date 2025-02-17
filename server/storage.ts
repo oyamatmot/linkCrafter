@@ -1,15 +1,19 @@
-import { User, InsertUser, Link, InsertLink, Click, InsertClick } from "@shared/schema";
-import session from "express-session";
-import createMemoryStore from "memorystore";
+import { User, InsertUser, Link, InsertLink, Click, InsertClick, users, links, clicks, recentSearches } from "@shared/schema";
+import { db } from "./db";
+import { eq, desc, and } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import session from "express-session";
+import connectPg from "connect-pg-simple";
+import { pool } from "./db";
 
-const MemoryStore = createMemoryStore(session);
+const PostgresSessionStore = connectPg(session);
 
 export interface IStorage {
   getAllUsers(): Promise<User[]>;
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUserPreferences(userId: number, preferences: any): Promise<User>;
 
   getAllLinks(): Promise<Link[]>;
   createLink(link: InsertLink & { userId: number }): Promise<Link>;
@@ -23,127 +27,125 @@ export interface IStorage {
   createClick(click: InsertClick): Promise<Click>;
   getLinkClicks(linkId: number): Promise<Click[]>;
 
+  addRecentSearch(userId: number, query: string, searchType: string): Promise<void>;
+  getRecentSearches(userId: number): Promise<string[]>;
+
   sessionStore: session.Store;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private links: Map<number, Link>;
-  private clicks: Map<number, Click>;
-  private currentId: { users: number; links: number; clicks: number };
+export class DatabaseStorage implements IStorage {
   readonly sessionStore: session.Store;
 
   constructor() {
-    this.users = new Map();
-    this.links = new Map();
-    this.clicks = new Map();
-    this.currentId = { users: 1, links: 1, clicks: 1 };
-    this.sessionStore = new MemoryStore({
-      checkPeriod: 86400000,
+    this.sessionStore = new PostgresSessionStore({
+      pool,
+      createTableIfMissing: true,
     });
   }
 
   async getAllUsers(): Promise<User[]> {
-    return Array.from(this.users.values());
-  }
-
-  async getAllLinks(): Promise<Link[]> {
-    return Array.from(this.links.values());
+    return await db.select().from(users).orderBy(desc(users.createdAt));
   }
 
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentId.users++;
-    const user = { id, ...insertUser };
-    this.users.set(id, user);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
   }
 
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
+  }
+
+  async updateUserPreferences(userId: number, preferences: any): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ preferences })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async getAllLinks(): Promise<Link[]> {
+    return await db.select().from(links).orderBy(desc(links.createdAt));
+  }
+
   async createLink(link: InsertLink & { userId: number }): Promise<Link> {
-    const id = this.currentId.links++;
     const shortCode = nanoid(8);
-    const newLink = {
-      id,
-      shortCode,
-      createdAt: new Date(),
-      password: link.password || null,
-      customDomain: link.customDomain || null,
-      title: link.title || null,
-      isPublished: link.isPublished ?? true,
-      ...link,
-    };
-    this.links.set(id, newLink);
+    const [newLink] = await db
+      .insert(links)
+      .values({ ...link, shortCode })
+      .returning();
     return newLink;
   }
 
   async getLink(id: number): Promise<Link | undefined> {
-    return this.links.get(id);
+    const [link] = await db.select().from(links).where(eq(links.id, id));
+    return link;
   }
 
   async getLinkByShortCode(shortCode: string): Promise<Link | undefined> {
-    return Array.from(this.links.values()).find(
-      (link) => link.shortCode === shortCode,
-    );
+    const [link] = await db.select().from(links).where(eq(links.shortCode, shortCode));
+    return link;
   }
 
   async getLinkByCustomDomain(customDomain: string): Promise<Link | undefined> {
-    return Array.from(this.links.values()).find(
-      (link) => link.customDomain === customDomain,
-    );
+    const [link] = await db.select().from(links).where(eq(links.customDomain, customDomain));
+    return link;
   }
 
   async getUserLinks(userId: number): Promise<Link[]> {
-    return Array.from(this.links.values()).filter(
-      (link) => link.userId === userId,
-    );
+    return await db
+      .select()
+      .from(links)
+      .where(eq(links.userId, userId))
+      .orderBy(desc(links.createdAt));
   }
 
   async updateLink(id: number, link: Partial<InsertLink>): Promise<Link> {
-    const existingLink = await this.getLink(id);
-    if (!existingLink) throw new Error("Link not found");
-
-    const updatedLink = {
-      ...existingLink,
-      ...link,
-      password: link.password || existingLink.password,
-      customDomain: link.customDomain || existingLink.customDomain,
-      title: link.title || existingLink.title,
-    };
-    this.links.set(id, updatedLink);
+    const [updatedLink] = await db
+      .update(links)
+      .set(link)
+      .where(eq(links.id, id))
+      .returning();
     return updatedLink;
   }
 
   async deleteLink(id: number): Promise<void> {
-    this.links.delete(id);
+    await db.delete(links).where(eq(links.id, id));
   }
 
   async createClick(click: InsertClick): Promise<Click> {
-    const id = this.currentId.clicks++;
-    const newClick = {
-      id,
-      clickedAt: new Date(),
-      userAgent: click.userAgent || null,
-      ipAddress: click.ipAddress || null,
-      ...click,
-    };
-    this.clicks.set(id, newClick);
+    const [newClick] = await db.insert(clicks).values(click).returning();
     return newClick;
   }
 
   async getLinkClicks(linkId: number): Promise<Click[]> {
-    return Array.from(this.clicks.values()).filter(
-      (click) => click.linkId === linkId,
-    );
+    return await db
+      .select()
+      .from(clicks)
+      .where(eq(clicks.linkId, linkId))
+      .orderBy(desc(clicks.clickedAt));
+  }
+
+  async addRecentSearch(userId: number, query: string, searchType: string): Promise<void> {
+    await db.insert(recentSearches).values({ userId, query, searchType });
+  }
+
+  async getRecentSearches(userId: number): Promise<string[]> {
+    const searches = await db
+      .select()
+      .from(recentSearches)
+      .where(eq(recentSearches.userId, userId))
+      .orderBy(desc(recentSearches.createdAt))
+      .limit(5);
+    return searches.map(s => s.query);
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
