@@ -90,7 +90,11 @@ export const insertLinkSchema = createInsertSchema(links)
   })
   .extend({
     originalUrl: z.string().url("Please enter a valid URL"),
-    password: z.string().min(6, "Password must be at least 6 characters").optional(),
+    password: z.union([
+      z.string().min(6, "Password must be at least 6 characters"),
+      z.string().length(0),
+      z.undefined()
+    ]).optional(),
     customDomain: z.string().regex(/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/, {
       message: "Please enter a valid domain name",
     }).optional(),
