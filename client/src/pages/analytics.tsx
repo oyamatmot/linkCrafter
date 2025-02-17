@@ -14,6 +14,10 @@ export default function Analytics() {
     queryKey: ["/api/links"],
   });
 
+  const { data: publicLinks = [] } = useQuery<(LinkType & { username: string })[]>({
+    queryKey: ["/api/links/public"],
+  });
+
   const { data: leaderboard = [] } = useQuery<{ username: string; totalClicks: number; isAI: boolean }[]>({
     queryKey: ["/api/leaderboard"],
   });

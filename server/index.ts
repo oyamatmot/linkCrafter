@@ -3,6 +3,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import chalk from "chalk";
 import crypto from "crypto";
+import { aiService } from "./services/ai-service";
 
 const app = express();
 app.use(express.json());
@@ -70,6 +71,36 @@ app.use((req, res, next) => {
   const server = await registerRoutes(app);
   const { KeepAliveService } = await import('./keep-alive');
   KeepAliveService.initialize(server);
+
+  // Initialize AI Service
+  try {
+    await aiService.initialize();
+    console.log(chalk.green("✓ AI Service initialized"));
+
+    // Schedule AI tasks
+    setInterval(async () => {
+      try {
+        const topics = ["technology", "science", "programming", "web development", "artificial intelligence"];
+        const randomTopic = topics[Math.floor(Math.random() * topics.length)];
+        await aiService.generateAndCreateLink(randomTopic);
+        console.log(chalk.blue("🤖 AI generated new link for topic:", randomTopic));
+      } catch (error) {
+        console.error(chalk.red("Error in AI link generation:"), error);
+      }
+    }, 1800000); // Every 30 minutes
+
+    // Schedule AI interaction with public links
+    setInterval(async () => {
+      try {
+        await aiService.clickRandomPublicLinks();
+        console.log(chalk.blue("🤖 AI interacted with public links"));
+      } catch (error) {
+        console.error(chalk.red("Error in AI link interaction:"), error);
+      }
+    }, 900000); // Every 15 minutes
+  } catch (error) {
+    console.error(chalk.red("Failed to initialize AI Service:"), error);
+  }
 
   // Modern error handling middleware
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
