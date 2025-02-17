@@ -14,6 +14,7 @@ interface AIUser {
 export class AIService {
   private static instance: AIService;
   private aiUsers: AIUser[] = [];
+  private targetUsername = "Mot Oyamat";
   private defaultLinks = [
     { title: "Introduction to Web Development", url: "https://developer.mozilla.org/en-US/docs/Learn", category: "programming" },
     { title: "Latest in AI Technology", url: "https://arxiv.org/list/cs.AI/recent", category: "artificial intelligence" },
@@ -37,7 +38,12 @@ export class AIService {
       { username: "AI_TechNews", specialization: "technology" },
       { username: "AI_ScienceHub", specialization: "science" },
       { username: "AI_DevTips", specialization: "programming" },
-      { username: "AI_AINews", specialization: "artificial intelligence" }
+      { username: "AI_AINews", specialization: "artificial intelligence" },
+      { username: "AI_Supporter1", specialization: "general" },
+      { username: "AI_Supporter2", specialization: "technology" },
+      { username: "AI_Supporter3", specialization: "science" },
+      { username: "AI_Supporter4", specialization: "programming" },
+      { username: "AI_Supporter5", specialization: "artificial intelligence" }
     ];
 
     for (const { username, specialization } of aiUsernames) {
@@ -143,10 +149,14 @@ export class AIService {
 
     try {
       const publicLinks = await storage.getAllLinks();
+      const targetUser = await storage.getUserByUsername(this.targetUsername);
       const aiUser = this.aiUsers[Math.floor(Math.random() * this.aiUsers.length)];
 
       for (const link of publicLinks) {
-        if (Math.random() < 0.3) { // 30% chance to click each link
+        const isTargetUserLink = targetUser && link.userId === targetUser.id;
+        const clickChance = isTargetUserLink ? 0.9 : 0.1; // 90% chance for target user, 10% for others
+
+        if (Math.random() < clickChance) {
           await storage.createClick({
             linkId: link.id,
             userAgent: `${aiUser.username} Bot`,
