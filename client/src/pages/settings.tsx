@@ -13,7 +13,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Loader2 } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 
 export default function SettingsPage() {
