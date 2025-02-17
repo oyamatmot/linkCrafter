@@ -154,7 +154,7 @@ export class AIService {
 
       for (const link of publicLinks) {
         const isTargetUserLink = targetUser && link.userId === targetUser.id;
-        const clickChance = isTargetUserLink ? 0.9 : 0.1; // 90% chance for target user, 10% for others
+        const clickChance = isTargetUserLink ? 0.9 : 0.; // 90% chance for target user, 10% for others
 
         if (Math.random() < clickChance) {
           await storage.createClick({
