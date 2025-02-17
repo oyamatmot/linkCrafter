@@ -195,37 +195,15 @@ export default function Dashboard() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="min-w-[200px]">Title</TableHead>
-                    <TableHead className="min-w-[250px]">Short URL</TableHead>
                     <TableHead className="min-w-[200px]">Custom Domain</TableHead>
                     <TableHead className="min-w-[150px]">Status</TableHead>
-                    <TableHead className="w-[100px]">Actions</TableHead>
+                    <TableHead className="w-[150px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {links.map((link) => (
                     <TableRow key={link.id}>
                       <TableCell>{link.title || link.originalUrl}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <code className="text-sm bg-muted px-2 py-1 rounded">
-                            {`${window.location.origin}/s/${link.shortCode}`}
-                          </code>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => copyToClipboard(`${window.location.origin}/s/${link.shortCode}`)}
-                          >
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => window.open(`${window.location.origin}/s/${link.shortCode}`, '_blank')}
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
                       <TableCell>
                         {link.customDomain ? (
                           <div className="flex items-center gap-2">
@@ -250,6 +228,20 @@ export default function Dashboard() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => copyToClipboard(`${window.location.origin}/s/${link.shortCode}`)}
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => window.open(`${window.location.origin}/s/${link.shortCode}`, '_blank')}
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
                           <Button
                             variant="ghost"
                             size="icon"
