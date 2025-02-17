@@ -8,6 +8,10 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+app.get('/api/health', (_req, res) => {
+  res.status(200).json({ status: 'healthy' });
+});
+
 // Encrypted credits (using a simple XOR encryption for demonstration)
 const encryptedCredits = Buffer.from("Credits to: Mot Oyamat").map(b => b ^ 0x42);
 const decryptCredits = () => Buffer.from(encryptedCredits).map(b => b ^ 0x42).toString();
@@ -64,6 +68,8 @@ app.use((req, res, next) => {
 
 (async () => {
   const server = await registerRoutes(app);
+  const { KeepAliveService } = await import('./keep-alive');
+  KeepAliveService.initialize(server);
 
   // Modern error handling middleware
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
