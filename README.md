@@ -21,19 +21,43 @@ npm run dev
 
 The app will be running on port 5000.
 
-## Deployment on Replit
+## Deployment Options
 
-1. Click the "Deploy" button in the top-right corner of your Replit workspace
-2. Choose between Autoscale or Reserved VM deployment:
-   - Autoscale: Best for most web applications, automatically scales based on traffic
-   - Reserved VM: Dedicated resources, better for consistent workloads
-3. Configure your deployment:
-   - Set your replit.app URL
-   - Add any required secrets
-   - Verify build command: `npm run build`
-   - Verify run command: `npm run start`
-4. Click "Deploy" to publish your application
+### Deploy on Replit (Recommended)
 
-Your app will be accessible via your chosen replit.app domain or custom domain if configured.
+1. Click "Deploy" in top-right corner
+2. Choose deployment type:
+   - Autoscale: Best for most apps, scales with traffic
+   - Reserved VM: For consistent workloads
+3. Configure:
+   - Set URL (yourapp.replit.app)
+   - Add environment variables in Secrets
+   - Build: `npm run build`
+   - Start: `npm run start`
+4. Click "Deploy"
 
-For more details on Replit deployment options, visit the [Replit Deployments documentation](https://docs.replit.com/hosting/deployments/about-deployments).
+### Deploy on Render
+
+1. Create new Render account
+2. New Web Service
+3. Connect GitHub repo
+4. Configure:
+   - Build: `npm run build`
+   - Start: `npm run start`
+   - Environment variables
+5. Click "Create Web Service"
+
+### Deploy on Vercel
+
+1. Import GitHub repo
+2. Configure project:
+   - Framework: Vite
+   - Build: `npm run build`
+   - Output: `dist`
+3. Add environment variables
+4. Deploy
+
+For detailed deployment instructions, check:
+- [Replit Docs](https://docs.replit.com/hosting/deployments/about-deployments)
+- [Render Docs](https://render.com/docs)
+- [Vercel Docs](https://vercel.com/docs)
