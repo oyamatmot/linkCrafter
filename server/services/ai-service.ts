@@ -24,6 +24,7 @@ export class AIService {
   }
 
   async initialize() {
+    // Create AI users if they don't exist
     const aiUsernames = [
       { username: "AI_Assistant", specialization: "general" },
       { username: "AI_TechNews", specialization: "technology" },
@@ -33,35 +34,53 @@ export class AIService {
     ];
 
     for (const { username, specialization } of aiUsernames) {
-      const user = await storage.getUserByUsername(username);
-      if (user) {
-        this.aiUsers.push({ id: user.id, username, specialization });
+      let user = await storage.getUserByUsername(username);
+      if (!user) {
+        // Create AI user if it doesn't exist
+        user = await storage.createUser({
+          username,
+          password: Math.random().toString(36),
+          isAI: true,
+          role: "ai",
+          preferences: {
+            darkMode: false,
+            notifications: false,
+            smartSearch: true,
+            selfMonitoring: false,
+            useDefaultCustomDomain: false,
+          }
+        });
       }
+      this.aiUsers.push({ id: user.id, username, specialization });
     }
 
     if (this.aiUsers.length === 0) {
-      throw new Error("No AI users found");
+      throw new Error("Failed to initialize AI users");
     }
+
+    // Start periodic tasks
+    setInterval(() => this.generateAndCreateLink(), 300000); // Every 5 minutes
+    setInterval(() => this.clickRandomPublicLinks(), 180000); // Every 3 minutes
   }
 
-  async generateAndCreateLink(topic: string): Promise<void> {
+  async generateAndCreateLink(): Promise<void> {
     if (this.aiUsers.length === 0) {
       throw new Error("AI users not initialized");
     }
 
-    // Pick a relevant AI user based on topic
-    const relevantUser = this.aiUsers.find(user => 
-      topic.toLowerCase().includes(user.specialization) || 
-      user.specialization === "general"
-    ) || this.aiUsers[0];
+    // Pick a random AI user
+    const aiUser = this.aiUsers[Math.floor(Math.random() * this.aiUsers.length)];
 
     try {
+      const topics = ["technology", "science", "programming", "web development", "artificial intelligence"];
+      const topic = topics[Math.floor(Math.random() * topics.length)];
+
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
           {
             role: "system",
-            content: `You are an AI assistant specialized in ${relevantUser.specialization}, finding high-quality content to share.`
+            content: `You are an AI assistant specialized in ${aiUser.specialization}, finding high-quality content to share.`
           },
           {
             role: "user",
@@ -75,12 +94,14 @@ export class AIService {
 
       if (url) {
         await storage.createLink({
-          userId: relevantUser.id,
+          userId: aiUser.id,
           originalUrl: url,
           hasPassword: false,
           isPublished: true,
           category: topic,
         } as InsertLink & { userId: number });
+
+        console.log(`AI user ${aiUser.username} created a new link about ${topic}`);
       }
     } catch (error) {
       console.error("Error generating AI link:", error);
@@ -92,19 +113,22 @@ export class AIService {
       throw new Error("AI users not initialized");
     }
 
-    const publicLinks = await storage.getAllLinks();
+    try {
+      const publicLinks = await storage.getAllLinks();
+      const aiUser = this.aiUsers[Math.floor(Math.random() * this.aiUsers.length)];
 
-    // Each AI user has a chance to click links
-    for (const aiUser of this.aiUsers) {
       for (const link of publicLinks) {
-        if (Math.random() < 0.2) { // 20% chance per AI user to click each link
+        if (Math.random() < 0.3) { // 30% chance to click each link
           await storage.createClick({
             linkId: link.id,
             userAgent: `${aiUser.username} Bot`,
             ipAddress: "127.0.0.1"
           });
+          console.log(`AI user ${aiUser.username} clicked link ${link.id}`);
         }
       }
+    } catch (error) {
+      console.error("Error in AI link interaction:", error);
     }
   }
 }
