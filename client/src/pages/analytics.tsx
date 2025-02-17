@@ -12,14 +12,17 @@ import { SiRoots } from "react-icons/si";
 export default function Analytics() {
   const { data: links = [] } = useQuery<LinkType[]>({
     queryKey: ["/api/links"],
+    refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   const { data: publicLinks = [] } = useQuery<(LinkType & { username: string })[]>({
     queryKey: ["/api/links/public"],
+    refetchInterval: 30000,
   });
 
   const { data: leaderboard = [] } = useQuery<{ username: string; totalClicks: number; isAI: boolean }[]>({
     queryKey: ["/api/leaderboard"],
+    refetchInterval: 30000,
   });
 
   const getRankIcon = (index: number) => {
