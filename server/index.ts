@@ -77,17 +77,22 @@ app.use((req, res, next) => {
     await aiService.initialize();
     console.log(chalk.green("✓ AI Service initialized"));
 
-    // Schedule AI tasks
+    // Generate initial AI links
+    const topics = ["technology", "science", "programming", "web development", "artificial intelligence"];
+    for (const topic of topics) {
+      await aiService.generateAndCreateLink(topic);
+    }
+
+    // Schedule AI tasks with shorter intervals for testing
     setInterval(async () => {
       try {
-        const topics = ["technology", "science", "programming", "web development", "artificial intelligence"];
         const randomTopic = topics[Math.floor(Math.random() * topics.length)];
         await aiService.generateAndCreateLink(randomTopic);
         console.log(chalk.blue("🤖 AI generated new link for topic:", randomTopic));
       } catch (error) {
         console.error(chalk.red("Error in AI link generation:"), error);
       }
-    }, 1800000); // Every 30 minutes
+    }, 60000); // Every 1 minute
 
     // Schedule AI interaction with public links
     setInterval(async () => {
@@ -97,7 +102,7 @@ app.use((req, res, next) => {
       } catch (error) {
         console.error(chalk.red("Error in AI link interaction:"), error);
       }
-    }, 900000); // Every 15 minutes
+    }, 30000); // Every 30 seconds
   } catch (error) {
     console.error(chalk.red("Failed to initialize AI Service:"), error);
   }
