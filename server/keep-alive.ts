@@ -1,17 +1,17 @@
 
-import WebSocket from "ws";
+import { WebSocketServer } from "ws";
 import { storage } from "./storage";
 import chalk from "chalk";
 
 export class KeepAliveService {
   private static instance: KeepAliveService;
-  private wsServer: WebSocket.Server;
+  private wsServer: WebSocketServer;
   private clients: Set<WebSocket> = new Set();
   private checkInterval: NodeJS.Timer;
   private restartAttempts = 0;
   
   private constructor(server: any) {
-    this.wsServer = new WebSocket.Server({ server });
+    this.wsServer = new WebSocketServer({ server });
     this.setupWebSocket();
     this.startHealthCheck();
   }
