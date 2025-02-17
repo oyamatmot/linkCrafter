@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { motion } from "framer-motion";
-import { Award, Crown, Medal, TrendingUp, Users } from "lucide-react";
+import { Award, Crown, Medal, TrendingUp, Users, User } from "lucide-react";
 import { SiRoots } from "react-icons/si";
 
 export default function Analytics() {
@@ -129,9 +129,9 @@ export default function Analytics() {
                       <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
                           index === 0 ? "bg-yellow-100" :
-                          index === 1 ? "bg-gray-100" :
-                          index === 2 ? "bg-amber-100" :
-                          "bg-primary/10"
+                            index === 1 ? "bg-gray-100" :
+                              index === 2 ? "bg-amber-100" :
+                                "bg-primary/10"
                         }`}>
                           {getRankIcon(index)}
                         </div>
@@ -172,24 +172,44 @@ export default function Analytics() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>User</TableHead>
-                      <TableHead>Link</TableHead>
-                      <TableHead>Clicks</TableHead>
+                      <TableHead className="w-[200px]">User</TableHead>
+                      <TableHead className="min-w-[300px]">Link</TableHead>
+                      <TableHead className="w-[100px] text-right">Clicks</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {publicLinks.map((link) => (
-                      <TableRow key={link.id}>
-                        <TableCell>{link.username}</TableCell>
-                        <TableCell>
-                          <a href={link.originalUrl} target="_blank" rel="noopener noreferrer"
-                            className="text-primary hover:underline">
-                            {link.originalUrl}
-                          </a>
+                    {publicLinks.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
+                          No public AI links available yet
                         </TableCell>
-                        <TableCell>{link.clicks || 0}</TableCell>
                       </TableRow>
-                    ))}
+                    ) : (
+                      publicLinks.map((link) => (
+                        <TableRow key={link.id}>
+                          <TableCell className="font-medium">
+                            <div className="flex items-center gap-2">
+                              <User className="h-4 w-4 text-muted-foreground" />
+                              {link.username}
+                            </div>
+                          </TableCell>
+                          <TableCell className="max-w-[300px] truncate">
+                            <a
+                              href={link.originalUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:underline"
+                              title={link.originalUrl}
+                            >
+                              {link.title || link.originalUrl}
+                            </a>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {link.clicks?.toLocaleString() || 0}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </CardContent>

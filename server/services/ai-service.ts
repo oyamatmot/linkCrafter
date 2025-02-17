@@ -1,8 +1,9 @@
-import { OpenAI } from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { storage } from "../storage";
 import { InsertLink, User } from "@shared/schema";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
 interface AIUser {
   id: number;
@@ -31,7 +32,6 @@ export class AIService {
   }
 
   async initialize() {
-    // Create AI users if they don't exist
     const aiUsernames = [
       { username: "AI_Assistant", specialization: "general" },
       { username: "AI_TechNews", specialization: "technology" },
@@ -43,7 +43,6 @@ export class AIService {
     for (const { username, specialization } of aiUsernames) {
       let user = await storage.getUserByUsername(username);
       if (!user) {
-        // Create AI user if it doesn't exist
         user = await storage.createUser({
           username,
           password: Math.random().toString(36),
@@ -102,9 +101,31 @@ export class AIService {
     }
 
     const aiUser = this.aiUsers[Math.floor(Math.random() * this.aiUsers.length)];
-    const randomLink = this.defaultLinks[Math.floor(Math.random() * this.defaultLinks.length)];
+    const topics = ["technology", "science", "programming", "web development", "artificial intelligence"];
+    const topic = topics[Math.floor(Math.random() * topics.length)];
 
     try {
+      const prompt = `Find a high-quality web resource about ${topic}. Respond with a URL to a reputable website in this format: "URL: [the url]". The URL should be from a well-known tech or educational website.`;
+
+      const result = await model.generateContent(prompt);
+      const response = result.response.text();
+      const url = response.match(/URL: (https?:\/\/[^\s]+)/)?.[1];
+
+      if (url) {
+        await storage.createLink({
+          userId: aiUser.id,
+          originalUrl: url,
+          hasPassword: false,
+          isPublished: true,
+          category: topic,
+        } as InsertLink & { userId: number });
+
+        console.log(`AI user ${aiUser.username} created a new link about ${topic}`);
+      }
+    } catch (error) {
+      console.error("Error generating AI link:", error);
+      // Fallback to default links if API fails
+      const randomLink = this.defaultLinks[Math.floor(Math.random() * this.defaultLinks.length)];
       await storage.createLink({
         userId: aiUser.id,
         originalUrl: randomLink.url,
@@ -112,10 +133,6 @@ export class AIService {
         isPublished: true,
         category: randomLink.category,
       } as InsertLink & { userId: number });
-
-      console.log(`AI user ${aiUser.username} created a new link about ${randomLink.category}`);
-    } catch (error) {
-      console.error("Error generating AI link:", error);
     }
   }
 
