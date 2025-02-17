@@ -1,0 +1,42 @@
+[vite] connecting...
+[vite] connected.
+Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+Warning: Function components cannot be given refs. Attempts to access this ref will fail. Did you mean to use React.forwardRef()?
+
+Check the render method of `Dashboard`.
+    at PasswordInput (https://2a0dd037-2537-4939-984a-d019ca1bbba0-00-2gdv3ix8cs7lj.janeway.replit.dev/src/components/ui/password-input.tsx:22:33)
+    at div
+    at div
+    at form
+    at div
+    at https://2a0dd037-2537-4939-984a-d019ca1bbba0-00-2gdv3ix8cs7lj.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-J37UDW3T.js?v=cb3d37da:41:13
+    at https://2a0dd037-2537-4939-984a-d019ca1bbba0-00-2gdv3ix8cs7lj.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-KR2FC54L.js?v=cb3d37da:59:7
+    at https://2a0dd037-2537-4939-984a-d019ca1bbba0-00-2gdv3ix8cs7lj.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-UACHJROW.js?v=cb3d37da:52:11
+    at https://2a0dd037-2537-4939-984a-d019ca1bbba0-00-2gdv3ix8cs7lj.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-UACHJROW.js?v=cb3d37da:33:11
+    at https://2a0dd037-2537-4939-984a-d019ca1bbba0-00-2gdv3ix8cs7lj.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-J37UDW3T.js?v=cb3d37da:41:13
+    at https://2a0dd037-2537-4939-984a-d019ca1bbba0-00-2gdv3ix8cs7lj.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=cb3d37da:49:5
+    at https://2a0dd037-2537-4939-984a-d019ca1bbba0-00-2gdv3ix8cs7lj.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=cb3d37da:1307:13
+    at https://2a0dd037-2537-4939-984a-d019ca1bbba0-00-2gdv3ix8cs7lj.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=cb3d37da:1230:58
+    at Presence (https://2a0dd037-2537-4939-984a-d019ca1bbba0-00-2gdv3ix8cs7lj.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-HHXI44QP.js?v=cb3d37da:24:11)
+    at https://2a0dd037-2537-4939-984a-d019ca1bbba0-00-2gdv3ix8cs7lj.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=cb3d37da:1221:64
+    at https://2a0dd037-2537-4939-984a-d019ca1bbba0-00-2gdv3ix8cs7lj.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-UACHJROW.js?v=cb3d37da:52:11
+    at https://2a0dd037-2537-4939-984a-d019ca1bbba0-00-2gdv3ix8cs7lj.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-UACHJROW.js?v=cb3d37da:33:11
+    at https://2a0dd037-2537-4939-984a-d019ca1bbba0-00-2gdv3ix8cs7lj.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-J37UDW3T.js?v=cb3d37da:41:13
+    at https://2a0dd037-2537-4939-984a-d019ca1bbba0-00-2gdv3ix8cs7lj.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-KR2FC54L.js?v=cb3d37da:258:22
+    at Presence (https://2a0dd037-2537-4939-984a-d019ca1bbba0-00-2gdv3ix8cs7lj.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-HHXI44QP.js?v=cb3d37da:24:11)
+    at Provider (https://2a0dd037-2537-4939-984a-d019ca1bbba0-00-2gdv3ix8cs7lj.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-6J5IXUBZ.js?v=cb3d37da:48:15)
+    at DialogPortal (https://2a0dd037-2537-4939-984a-d019ca1bbba0-00-2gdv3ix8cs7lj.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=cb3d37da:1184:11)
+    at _c3 (https://2a0dd037-2537-4939-984a-d019ca1bbba0-00-2gdv3ix8cs7lj.janeway.replit.dev/src/components/ui/dialog.tsx:51:12)
+    at Provider (https://2a0dd037-2537-4939-984a-d019ca1bbba0-00-2gdv3ix8cs7lj.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-6J5IXUBZ.js?v=cb3d37da:48:15)
+    at Dialog (https://2a0dd037-2537-4939-984a-d019ca1bbba0-00-2gdv3ix8cs7lj.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=cb3d37da:1125:5)
+    at div
+    at main
+    at div
+    at Dashboard (https://2a0dd037-2537-4939-984a-d019ca1bbba0-00-2gdv3ix8cs7lj.janeway.replit.dev/src/pages/dashboard.tsx:70:36)
+    at ProtectedRoute (https://2a0dd037-2537-4939-984a-d019ca1bbba0-00-2gdv3ix8cs7lj.janeway.replit.dev/src/lib/protected-route.tsx:22:3)
+    at Switch (https://2a0dd037-2537-4939-984a-d019ca1bbba0-00-2gdv3ix8cs7lj.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=cb3d37da:379:17)
+    at Router
+    at AuthProvider (https://2a0dd037-2537-4939-984a-d019ca1bbba0-00-2gdv3ix8cs7lj.janeway.replit.dev/src/hooks/use-auth.tsx:26:32)
+    at ThemeProvider (https://2a0dd037-2537-4939-984a-d019ca1bbba0-00-2gdv3ix8cs7lj.janeway.replit.dev/src/hooks/use-theme.tsx:25:3)
+    at QueryClientProvider (https://2a0dd037-2537-4939-984a-d019ca1bbba0-00-2gdv3ix8cs7lj.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=cb3d37da:2805:3)
+    at App
