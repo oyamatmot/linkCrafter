@@ -27,7 +27,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/links/public", async (req, res) => {
     const users = await storage.getAllUsers();
-    const aiUsers = users.filter(user => user.username.includes('_AI'));
+    const aiUsers = users.filter(user => user.username.startsWith('AI_'));
 
     const publicLinks = [];
     for (const user of aiUsers) {
