@@ -10,6 +10,7 @@ import {
   Search,
   LogOut,
   User,
+  Users,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -18,11 +19,14 @@ export function NavigationBar() {
   const { user, logoutMutation } = useAuth();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [scrollDirection, setScrollDirection] = useState<"up" | "down">("up");
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      setIsVisible(currentScrollY <= lastScrollY || currentScrollY < 50);
+      const direction = currentScrollY > lastScrollY ? "down" : "up";
+      setScrollDirection(direction);
+      setIsVisible(direction === "up" || currentScrollY < 50);
       setLastScrollY(currentScrollY);
     };
 
@@ -42,6 +46,11 @@ export function NavigationBar() {
       icon: BarChart2,
     },
     {
+      title: "Team",
+      href: "/team",
+      icon: Users,
+    },
+    {
       title: "Search",
       href: "/search",
       icon: Search,
@@ -56,15 +65,27 @@ export function NavigationBar() {
   return (
     <AnimatePresence>
       <motion.nav
-        initial={{ y: 0 }}
-        animate={{ y: isVisible ? 0 : -100 }}
-        transition={{ duration: 0.3 }}
+        initial={{ y: 0, opacity: 0 }}
+        animate={{
+          y: isVisible ? 0 : -100,
+          opacity: 1,
+        }}
+        transition={{
+          duration: 0.3,
+          type: "spring",
+          stiffness: 260,
+          damping: 20,
+        }}
         className={cn(
-          "fixed bottom-0 left-0 right-0 md:top-0 md:bottom-auto bg-white border-t md:border-b md:border-t-0 backdrop-blur-lg bg-white/50 z-50",
-          "transition-transform duration-300"
+          "fixed bottom-0 left-0 right-0 md:top-0 md:bottom-auto z-50",
+          "backdrop-blur-xl bg-background/80 shadow-lg",
+          "border-t md:border-b md:border-t-0",
+          "transition-all duration-300 ease-in-out",
+          "mx-auto md:mx-4 lg:mx-8 md:mt-4 md:rounded-full",
+          "max-w-7xl"
         )}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="px-4 md:px-8">
           <div className="flex items-center justify-between h-16">
             <motion.div
               initial={{ opacity: 0, x: -20 }}

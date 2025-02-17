@@ -11,6 +11,7 @@ import HomePage from "@/pages/home-page";
 import Analytics from "@/pages/analytics";
 import Search from "@/pages/search";
 import Settings from "@/pages/settings";
+import TeamPage from "@/pages/team";
 import PrivacyPolicy from "@/pages/privacy-policy";
 import TermsOfService from "@/pages/terms-of-service";
 import { ProtectedRoute } from "./lib/protected-route";
@@ -21,6 +22,7 @@ function Router() {
       <Route path="/auth" component={AuthPage} />
       <ProtectedRoute path="/dashboard" component={Dashboard} />
       <ProtectedRoute path="/analytics" component={Analytics} />
+      <ProtectedRoute path="/team" component={TeamPage} />
       <ProtectedRoute path="/search" component={Search} />
       <ProtectedRoute path="/settings" component={Settings} />
       <Route path="/privacy-policy" component={PrivacyPolicy} />
