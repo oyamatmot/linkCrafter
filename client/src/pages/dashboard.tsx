@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -102,12 +102,18 @@ export default function Dashboard() {
     defaultValues: {
       originalUrl: "",
       password: "",
-      customDomain: "",
+      customDomain: user?.preferences?.defaultCustomDomain || "",
       isPublished: true,
       hasPassword: false,
       category: "",
     },
   });
+
+  useEffect(() => {
+    if (user?.preferences?.useDefaultCustomDomain) {
+      form.setValue("customDomain", user?.preferences?.defaultCustomDomain || "");
+    }
+  }, [user?.preferences, form]);
 
   const { data: analytics } = useQuery<any>({
     queryKey: ["/api/links", selectedLink?.id, "analytics"],
@@ -145,7 +151,6 @@ export default function Dashboard() {
               </DialogHeader>
               <form onSubmit={form.handleSubmit((data) => {
                 createLinkMutation.mutate(data);
-                // Show celebration animation on success
                 if (!createLinkMutation.isError) {
                   confetti({
                     particleCount: 100,
@@ -164,18 +169,20 @@ export default function Dashboard() {
                       </p>
                     )}
                   </div>
-                  <div>
-                    <Label>Custom Domain (Optional)</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        {...form.register("customDomain")}
-                        placeholder="mylink.com"
-                      />
-                      <Button variant="outline" size="icon">
-                        <Globe className="h-4 w-4" />
-                      </Button>
+                  {!user?.preferences?.useDefaultCustomDomain && (
+                    <div>
+                      <Label>Custom Domain (Optional)</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          {...form.register("customDomain")}
+                          placeholder="mylink.com"
+                        />
+                        <Button variant="outline" size="icon">
+                          <Globe className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
+                  )}
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={form.watch("hasPassword")}
@@ -189,9 +196,9 @@ export default function Dashboard() {
                   {form.watch("hasPassword") && (
                     <div>
                       <Label>Password</Label>
-                      <PasswordInput 
+                      <PasswordInput
                         placeholder="Enter password"
-                        {...form.register("password")} 
+                        {...form.register("password")}
                       />
                       {form.formState.errors.password && (
                         <p className="text-sm text-destructive mt-1">

@@ -6,20 +6,24 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { motion } from "framer-motion";
-import { Award, TrendingUp, Users } from "lucide-react";
+import { Award, Crown, Medal, TrendingUp, Users } from "lucide-react";
+import { SiRoots } from "react-icons/si";
 
 export default function Analytics() {
   const { data: links = [] } = useQuery<LinkType[]>({
     queryKey: ["/api/links"],
   });
 
-  const { data: leaderboard = [] } = useQuery<{ username: string; totalClicks: number }[]>({
+  const { data: leaderboard = [] } = useQuery<{ username: string; totalClicks: number; isAI: boolean }[]>({
     queryKey: ["/api/leaderboard"],
   });
 
-  const { data: publicLinks = [] } = useQuery<LinkType[]>({
-    queryKey: ["/api/links/public"],
-  });
+  const getRankIcon = (index: number) => {
+    if (index === 0) return <Crown className="h-6 w-6 text-yellow-500" />;
+    if (index === 1) return <Medal className="h-6 w-6 text-gray-400" />;
+    if (index === 2) return <Medal className="h-6 w-6 text-amber-600" />;
+    return <SiRoots className="h-5 w-5 text-wood" />;
+  };
 
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0 md:pt-16">
@@ -102,39 +106,54 @@ export default function Analytics() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
+            className="row-span-2"
           >
             <Card>
               <CardHeader>
-                <CardTitle>Top Users</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Award className="h-5 w-5" />
+                  Top 10 Link Masters
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {leaderboard.map((user, index) => (
+                  {leaderboard.slice(0, 10).map((user, index) => (
                     <div
                       key={user.username}
-                      className="flex items-center justify-between"
+                      className="flex items-center justify-between p-3 rounded-lg hover:bg-accent/50 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                          index === 0 ? "bg-yellow-100 text-yellow-600" :
-                          index === 1 ? "bg-gray-100 text-gray-600" :
-                          index === 2 ? "bg-orange-100 text-orange-600" :
-                          "bg-primary/10 text-primary"
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                          index === 0 ? "bg-yellow-100" :
+                          index === 1 ? "bg-gray-100" :
+                          index === 2 ? "bg-amber-100" :
+                          "bg-primary/10"
                         }`}>
-                          {index + 1}
+                          {getRankIcon(index)}
                         </div>
-                        <span className="font-medium">{user.username}</span>
+                        <div>
+                          <span className="font-medium flex items-center gap-2">
+                            {user.username}
+                            {user.isAI && (
+                              <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                                AI
+                              </span>
+                            )}
+                          </span>
+                          <span className="text-sm text-muted-foreground">
+                            {user.totalClicks.toLocaleString()} clicks
+                          </span>
+                        </div>
                       </div>
-                      <span className="text-muted-foreground">
-                        {user.totalClicks} clicks
-                      </span>
+                      <div className="text-2xl font-bold">
+                        #{index + 1}
+                      </div>
                     </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
           </motion.div>
-
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -159,8 +178,8 @@ export default function Analytics() {
                       <TableRow key={link.id}>
                         <TableCell>{link.username}</TableCell>
                         <TableCell>
-                          <a href={link.originalUrl} target="_blank" rel="noopener noreferrer" 
-                             className="text-primary hover:underline">
+                          <a href={link.originalUrl} target="_blank" rel="noopener noreferrer"
+                            className="text-primary hover:underline">
                             {link.originalUrl}
                           </a>
                         </TableCell>

@@ -8,17 +8,20 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   email: text("email"),
+  isAI: boolean("is_ai").default(false),
   preferences: json("preferences").$type<{
     darkMode: boolean;
     notifications: boolean;
     smartSearch: boolean;
     selfMonitoring: boolean;
     defaultCustomDomain?: string;
+    useDefaultCustomDomain: boolean;
   }>().default({
     darkMode: false,
     notifications: false,
     smartSearch: true,
     selfMonitoring: true,
+    useDefaultCustomDomain: false,
   }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -74,6 +77,7 @@ export const insertUserSchema = createInsertSchema(users)
     password: true,
     email: true,
     preferences: true,
+    isAI: true,
   })
   .extend({
     email: z.string().email("Invalid email").optional(),
