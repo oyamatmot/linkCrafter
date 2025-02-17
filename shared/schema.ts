@@ -8,7 +8,6 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   email: text("email"),
-  isAi: boolean("is_ai").default(false),
   preferences: json("preferences").$type<{
     darkMode: boolean;
     notifications: boolean;
@@ -34,6 +33,7 @@ export const links = pgTable("links", {
   password: text("password"),
   isPublished: boolean("is_published").default(true).notNull(),
   category: text("category"),
+  clicks: integer("clicks").default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

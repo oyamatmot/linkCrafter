@@ -31,7 +31,6 @@ export async function setupAiUsers() {
         username: aiUser.username,
         password: await hashPassword(aiUser.password),
         email: `${aiUser.username.toLowerCase()}@ai.example.com`,
-        isAi: true,
         preferences: {
           darkMode: Math.random() > 0.5,
           notifications: true,
@@ -62,6 +61,5 @@ export async function setupAiUsers() {
   }
 }
 
-if (require.main === module) {
-  setupAiUsers().catch(console.error);
-}
+// Run the setup if this file is executed directly
+setupAiUsers().catch(console.error);
