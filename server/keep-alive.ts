@@ -1,5 +1,5 @@
 
-import { WebSocketServer } from "ws";
+import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import chalk from "chalk";
 
@@ -11,7 +11,11 @@ export class KeepAliveService {
   private restartAttempts = 0;
   
   private constructor(server: any) {
-    this.wsServer = new WebSocketServer({ server });
+    this.wsServer = new WebSocketServer({ 
+      server,
+      path: "/ws",
+      perMessageDeflate: false
+    });
     this.setupWebSocket();
     this.startHealthCheck();
   }
@@ -24,9 +28,12 @@ export class KeepAliveService {
   }
 
   private setupWebSocket() {
-    this.wsServer.on('connection', (ws) => {
+    this.wsServer.on('connection', (ws: WebSocket) => {
       this.clients.add(ws);
       ws.on('close', () => this.clients.delete(ws));
+      ws.on('error', (error) => {
+        console.error(chalk.red('WebSocket error:', error));
+      });
     });
   }
 
@@ -59,10 +66,10 @@ export class KeepAliveService {
         
         if (this.restartAttempts >= 3) {
           await this.notifyUsers('Application experienced issues and is attempting to restart', 'error');
-          process.exit(1); // Replit will automatically restart the process
+          process.exit(1);
         }
       }
-    }, 60000); // Check every minute
+    }, 60000);
   }
 
   cleanup() {
