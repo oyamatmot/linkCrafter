@@ -1,22 +1,46 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link as LinkType } from "@shared/schema";
 import { NavigationBar } from "@/components/navigation-bar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
-import { Search as SearchIcon, User, Link as LinkIcon, ExternalLink } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search as SearchIcon, User, Link as LinkIcon, ExternalLink, History } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchType, setSearchType] = useState<"users" | "links">("links");
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const { data: searchResults = [] } = useQuery<any[]>({
     queryKey: ["/api/search", searchType, searchQuery],
     enabled: searchQuery.length > 2,
   });
+
+  const { data: recommendations = [] } = useQuery<string[]>({
+    queryKey: ["/api/search/recommendations", searchType, searchQuery],
+    enabled: searchQuery.length > 0,
+  });
+
+  useEffect(() => {
+    const stored = localStorage.getItem("recentSearches");
+    if (stored) {
+      setRecentSearches(JSON.parse(stored));
+    }
+  }, []);
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    if (query && !recentSearches.includes(query)) {
+      const updated = [query, ...recentSearches].slice(0, 5);
+      setRecentSearches(updated);
+      localStorage.setItem("recentSearches", JSON.stringify(updated));
+    }
+    setShowSuggestions(false);
+  };
 
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0 md:pt-16">
@@ -45,10 +69,63 @@ export default function SearchPage() {
                     placeholder="Search..."
                     className="pl-9"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setShowSuggestions(true);
+                    }}
+                    onFocus={() => setShowSuggestions(true)}
                   />
+
+                  <AnimatePresence>
+                    {showSuggestions && (searchQuery || recentSearches.length > 0) && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute w-full bg-background border rounded-md mt-1 shadow-lg z-50"
+                      >
+                        {searchQuery && recommendations.length > 0 && (
+                          <div className="p-2">
+                            <div className="text-sm font-medium text-muted-foreground px-2 py-1">
+                              Suggestions
+                            </div>
+                            {recommendations.map((suggestion, index) => (
+                              <Button
+                                key={index}
+                                variant="ghost"
+                                className="w-full justify-start text-left"
+                                onClick={() => handleSearch(suggestion)}
+                              >
+                                <SearchIcon className="h-4 w-4 mr-2" />
+                                {suggestion}
+                              </Button>
+                            ))}
+                          </div>
+                        )}
+
+                        {recentSearches.length > 0 && (
+                          <div className="p-2 border-t">
+                            <div className="text-sm font-medium text-muted-foreground px-2 py-1">
+                              Recent Searches
+                            </div>
+                            {recentSearches.map((recent, index) => (
+                              <Button
+                                key={index}
+                                variant="ghost"
+                                className="w-full justify-start text-left"
+                                onClick={() => handleSearch(recent)}
+                              >
+                                <History className="h-4 w-4 mr-2" />
+                                {recent}
+                              </Button>
+                            ))}
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
-                
+
                 <Tabs value={searchType} onValueChange={(v) => setSearchType(v as "users" | "links")}>
                   <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="links">Links</TabsTrigger>

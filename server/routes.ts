@@ -72,7 +72,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(analytics);
   });
 
-  // Add this new endpoint after the analytics endpoint
+  // Add this new endpoint for search
+  app.get("/api/search", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    const searchType = req.query.searchType as string;
+    const query = req.query.q as string;
+
+    if (!query) return res.json([]);
+
+    if (searchType === "links") {
+      const links = await storage.getAllLinks();
+      const filteredLinks = links.filter(link =>
+        link.title?.toLowerCase().includes(query.toLowerCase()) ||
+        link.originalUrl.toLowerCase().includes(query.toLowerCase()) ||
+        link.shortCode.toLowerCase().includes(query.toLowerCase())
+      );
+      res.json(filteredLinks);
+    } else if (searchType === "users") {
+      const users = await storage.getAllUsers();
+      const searchResults = await Promise.all(
+        users
+          .filter(user => user.username.toLowerCase().includes(query.toLowerCase()))
+          .map(async user => ({
+            ...user,
+            totalLinks: (await storage.getUserLinks(user.id)).length
+          }))
+      );
+      res.json(searchResults);
+    }
+  });
+
+  // Add this new endpoint after the search endpoint
+  app.get("/api/search/recommendations", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    const searchType = req.query.searchType as string;
+    const query = req.query.q as string;
+
+    if (!query) return res.json([]);
+
+    let recommendations: string[] = [];
+
+    if (searchType === "links") {
+      const links = await storage.getAllLinks();
+      const domains = new Set(links.map(link => {
+        try {
+          return new URL(link.originalUrl).hostname;
+        } catch {
+          return null;
+        }
+      }).filter((domain): domain is string => domain !== null));
+
+      recommendations = Array.from(domains)
+        .filter(domain => domain.toLowerCase().includes(query.toLowerCase()))
+        .slice(0, 5);
+    } else if (searchType === "users") {
+      const users = await storage.getAllUsers();
+      recommendations = users
+        .map(user => user.username)
+        .filter(username => username.toLowerCase().includes(query.toLowerCase()))
+        .slice(0, 5);
+    }
+
+    res.json(recommendations);
+  });
+
   app.get("/api/leaderboard", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
 
@@ -84,15 +149,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }))
     );
 
-    const leaderboard = userLinks
-      .map(({ username, links }) => ({
-        username,
-        totalClicks: links.reduce((acc, link) => acc + link.clicks, 0),
-      }))
+    const leaderboard = await Promise.all(
+      userLinks.map(async ({ username, links }) => {
+        const clickCounts = await Promise.all(
+          links.map(link => storage.getLinkClicks(link.id))
+        );
+        const totalClicks = clickCounts.reduce((acc, clicks) => acc + clicks.length, 0);
+        return { username, totalClicks };
+      })
+    );
+
+    const sortedLeaderboard = leaderboard
       .sort((a, b) => b.totalClicks - a.totalClicks)
       .slice(0, 10);
 
-    res.json(leaderboard);
+    res.json(sortedLeaderboard);
   });
 
   // Redirect routes

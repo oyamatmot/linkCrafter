@@ -11,6 +11,7 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
 
+  getAllLinks(): Promise<Link[]>;
   createLink(link: InsertLink & { userId: number }): Promise<Link>;
   getLink(id: number): Promise<Link | undefined>;
   getLinkByShortCode(shortCode: string): Promise<Link | undefined>;
@@ -32,10 +33,6 @@ export class MemStorage implements IStorage {
   private currentId: { users: number; links: number; clicks: number };
   readonly sessionStore: session.Store;
 
-  async getAllUsers(): Promise<User[]> {
-    return Array.from(this.users.values());
-  }
-
   constructor() {
     this.users = new Map();
     this.links = new Map();
@@ -44,6 +41,14 @@ export class MemStorage implements IStorage {
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000,
     });
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
+  }
+
+  async getAllLinks(): Promise<Link[]> {
+    return Array.from(this.links.values());
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -70,6 +75,10 @@ export class MemStorage implements IStorage {
       id,
       shortCode,
       createdAt: new Date(),
+      password: link.password || null,
+      customDomain: link.customDomain || null,
+      title: link.title || null,
+      isPublished: link.isPublished ?? true,
       ...link,
     };
     this.links.set(id, newLink);
@@ -102,7 +111,13 @@ export class MemStorage implements IStorage {
     const existingLink = await this.getLink(id);
     if (!existingLink) throw new Error("Link not found");
 
-    const updatedLink = { ...existingLink, ...link };
+    const updatedLink = {
+      ...existingLink,
+      ...link,
+      password: link.password || existingLink.password,
+      customDomain: link.customDomain || existingLink.customDomain,
+      title: link.title || existingLink.title,
+    };
     this.links.set(id, updatedLink);
     return updatedLink;
   }
@@ -116,6 +131,8 @@ export class MemStorage implements IStorage {
     const newClick = {
       id,
       clickedAt: new Date(),
+      userAgent: click.userAgent || null,
+      ipAddress: click.ipAddress || null,
       ...click,
     };
     this.clicks.set(id, newClick);

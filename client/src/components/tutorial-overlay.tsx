@@ -58,6 +58,8 @@ export function TutorialOverlay({ onComplete }: { onComplete: () => void }) {
 
   if (isDismissed) return null;
 
+  const CurrentIcon = tutorialSteps[currentStep].icon;
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -82,9 +84,7 @@ export function TutorialOverlay({ onComplete }: { onComplete: () => void }) {
                 transition={{ delay: 0.2 }}
                 className="flex justify-center mb-4"
               >
-                {React.createElement(tutorialSteps[currentStep].icon, {
-                  className: "h-12 w-12 text-primary"
-                })}
+                <CurrentIcon className="h-12 w-12 text-primary" />
               </motion.div>
               <h2 className="text-2xl font-bold mb-2">
                 {tutorialSteps[currentStep].title}
