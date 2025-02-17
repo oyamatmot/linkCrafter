@@ -9,17 +9,18 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  
+
   createLink(link: InsertLink & { userId: number }): Promise<Link>;
   getLink(id: number): Promise<Link | undefined>;
   getLinkByShortCode(shortCode: string): Promise<Link | undefined>;
+  getLinkByCustomDomain(customDomain: string): Promise<Link | undefined>;
   getUserLinks(userId: number): Promise<Link[]>;
   updateLink(id: number, link: Partial<InsertLink>): Promise<Link>;
   deleteLink(id: number): Promise<void>;
-  
+
   createClick(click: InsertClick): Promise<Click>;
   getLinkClicks(linkId: number): Promise<Click[]>;
-  
+
   sessionStore: session.Store;
 }
 
@@ -80,6 +81,12 @@ export class MemStorage implements IStorage {
     );
   }
 
+  async getLinkByCustomDomain(customDomain: string): Promise<Link | undefined> {
+    return Array.from(this.links.values()).find(
+      (link) => link.customDomain === customDomain,
+    );
+  }
+
   async getUserLinks(userId: number): Promise<Link[]> {
     return Array.from(this.links.values()).filter(
       (link) => link.userId === userId,
@@ -89,7 +96,7 @@ export class MemStorage implements IStorage {
   async updateLink(id: number, link: Partial<InsertLink>): Promise<Link> {
     const existingLink = await this.getLink(id);
     if (!existingLink) throw new Error("Link not found");
-    
+
     const updatedLink = { ...existingLink, ...link };
     this.links.set(id, updatedLink);
     return updatedLink;

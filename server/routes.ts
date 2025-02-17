@@ -10,7 +10,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Link management routes
   app.post("/api/links", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
-    
+
     const validatedData = insertLinkSchema.parse(req.body);
     const link = await storage.createLink({
       ...validatedData,
@@ -36,7 +36,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     const link = await storage.getLink(parseInt(req.params.id));
     if (!link || link.userId !== req.user!.id) return res.sendStatus(404);
-    
+
     const validatedData = insertLinkSchema.partial().parse(req.body);
     const updatedLink = await storage.updateLink(link.id, validatedData);
     res.json(updatedLink);
@@ -56,14 +56,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const link = await storage.getLink(parseInt(req.params.id));
     if (!link || link.userId !== req.user!.id) return res.sendStatus(404);
     const clicks = await storage.getLinkClicks(link.id);
-    res.json(clicks);
+
+    // Group clicks by day for the chart
+    const analytics = clicks.reduce((acc: any[], click) => {
+      const date = new Date(click.clickedAt).toLocaleDateString();
+      const existingDay = acc.find(day => day.clickedAt === date);
+      if (existingDay) {
+        existingDay.count++;
+      } else {
+        acc.push({ clickedAt: date, count: 1 });
+      }
+      return acc;
+    }, []);
+
+    res.json(analytics);
   });
 
-  // Redirect route
+  // Redirect routes
   app.get("/s/:shortCode", async (req, res) => {
     const link = await storage.getLinkByShortCode(req.params.shortCode);
     if (!link || !link.isPublished) return res.sendStatus(404);
-    
+
     if (link.password && req.query.password !== link.password) {
       return res.status(401).send("Password required");
     }
@@ -74,7 +87,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ipAddress: req.ip,
     });
 
-    res.redirect(link.originalUrl);
+    const targetUrl = link.customDomain || link.originalUrl;
+    res.redirect(targetUrl);
   });
 
   const httpServer = createServer(app);

@@ -13,6 +13,7 @@ export const links = pgTable("links", {
   userId: integer("user_id").notNull().references(() => users.id),
   originalUrl: text("original_url").notNull(),
   shortCode: text("short_code").notNull().unique(),
+  customDomain: text("custom_domain"),
   title: text("title"),
   password: text("password"),
   isPublished: boolean("is_published").default(true).notNull(),
@@ -38,11 +39,15 @@ export const insertLinkSchema = createInsertSchema(links)
     title: true,
     password: true,
     isPublished: true,
+    customDomain: true,
   })
   .extend({
-    originalUrl: z.string().url(),
-    title: z.string().min(1).max(100).optional(),
-    password: z.string().min(6).max(100).optional(),
+    originalUrl: z.string().url("Please enter a valid URL"),
+    title: z.string().min(1, "Title is required").max(100).optional(),
+    password: z.string().min(6, "Password must be at least 6 characters").max(100).optional(),
+    customDomain: z.string().regex(/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/, {
+      message: "Please enter a valid domain name",
+    }).optional(),
   });
 
 export const insertClickSchema = createInsertSchema(clicks).pick({
