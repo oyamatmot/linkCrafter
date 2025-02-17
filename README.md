@@ -23,8 +23,17 @@ The app will be running on port 5000.
 
 ## Deployment on Replit
 
-1. Create a new Repl and import this repository
-2. Install dependencies using the package manager
-3. Click "Run" to start the application
+1. Click the "Deploy" button in the top-right corner of your Replit workspace
+2. Choose between Autoscale or Reserved VM deployment:
+   - Autoscale: Best for most web applications, automatically scales based on traffic
+   - Reserved VM: Dedicated resources, better for consistent workloads
+3. Configure your deployment:
+   - Set your replit.app URL
+   - Add any required secrets
+   - Verify build command: `npm run build`
+   - Verify run command: `npm run start`
+4. Click "Deploy" to publish your application
 
-The app will automatically deploy and be accessible via your Repl URL.
+Your app will be accessible via your chosen replit.app domain or custom domain if configured.
+
+For more details on Replit deployment options, visit the [Replit Deployments documentation](https://docs.replit.com/hosting/deployments/about-deployments).
