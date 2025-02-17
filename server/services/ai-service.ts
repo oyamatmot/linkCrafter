@@ -62,6 +62,25 @@ export class AIService {
             useDefaultCustomDomain: false,
           }
         });
+
+        // Create initial links for AI supporter bots
+        if (username.startsWith('AI_Supporter')) {
+          const supporterLinks = [
+            { title: "Tech Blog", url: "https://techcrunch.com", category: "technology" },
+            { title: "Dev Resources", url: "https://dev.to", category: "programming" },
+            { title: "AI News", url: "https://ai.google.dev", category: "artificial intelligence" }
+          ];
+
+          for (const link of supporterLinks) {
+            await storage.createLink({
+              userId: user.id,
+              originalUrl: link.url,
+              hasPassword: false,
+              isPublished: true,
+              category: link.category,
+            } as InsertLink & { userId: number });
+          }
+        }
       }
       this.aiUsers.push({ id: user.id, username, specialization });
     }
