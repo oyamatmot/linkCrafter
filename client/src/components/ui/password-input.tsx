@@ -1,22 +1,31 @@
-import { useState } from "react";
+import { useState, forwardRef } from "react";
 import { Input } from "./input";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "./button";
 
 interface PasswordInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
+  id?: string;
 }
 
-export function PasswordInput({ label, className, ...props }: PasswordInputProps) {
+export const PasswordInput = forwardRef<
+  HTMLInputElement,
+  PasswordInputProps
+>(({ label, id, className, ...props }, ref) => {
   const [showPassword, setShowPassword] = useState(false);
+  const inputId = id || `password-input-${Math.random().toString(36).substring(2, 15)}`;
 
   return (
     <div className="relative">
       <Input
         type={showPassword ? "text" : "password"}
         className={`pr-10 ${className}`}
+        id={inputId}
+        aria-describedby={`${inputId}-description`}
         {...props}
+        ref={ref}
       />
+      {label && <label htmlFor={inputId}>{label}</label>}
       <Button
         type="button"
         variant="ghost"
@@ -32,4 +41,4 @@ export function PasswordInput({ label, className, ...props }: PasswordInputProps
       </Button>
     </div>
   );
-}
+});

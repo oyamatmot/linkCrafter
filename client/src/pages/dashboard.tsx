@@ -138,7 +138,8 @@ export default function Dashboard() {
                 Create New Link
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent aria-describedby="dialog-description">
+              <div id="dialog-description" className="sr-only">Create a new link dialog</div>
               <DialogHeader>
                 <DialogTitle>Create New Link</DialogTitle>
               </DialogHeader>
