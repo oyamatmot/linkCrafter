@@ -6,14 +6,21 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/use-auth";
-import { Bell, Moon, Sun, Globe } from "lucide-react";
+import { Bell, Moon, Sun, Globe, Smartphone, Search, Book, Activity } from "lucide-react";
+import { TutorialOverlay } from "@/components/tutorial-overlay";
+import { useState } from "react";
 
 export default function SettingsPage() {
   const { user } = useAuth();
+  const [showTutorial, setShowTutorial] = useState(false);
 
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0 md:pt-16">
       <NavigationBar />
+
+      {showTutorial && (
+        <TutorialOverlay onComplete={() => setShowTutorial(false)} />
+      )}
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <motion.div
@@ -63,32 +70,49 @@ export default function SettingsPage() {
             >
               <Card>
                 <CardHeader>
-                  <CardTitle>Preferences</CardTitle>
+                  <CardTitle>Advanced Features</CardTitle>
                   <CardDescription>
-                    Customize your application experience
+                    Customize advanced application features
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Bell className="h-4 w-4" />
-                      <Label>Enable Notifications</Label>
+                      <Search className="h-4 w-4" />
+                      <div>
+                        <Label>Smart Search Recommendations</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Get intelligent link suggestions while searching
+                        </p>
+                      </div>
                     </div>
                     <Switch />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Moon className="h-4 w-4" />
-                      <Label>Dark Mode</Label>
+                      <Activity className="h-4 w-4" />
+                      <div>
+                        <Label>Self-Monitoring</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Monitor app performance and receive alerts
+                        </p>
+                      </div>
                     </div>
                     <Switch />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Globe className="h-4 w-4" />
-                      <Label>Default to Custom Domains</Label>
+                      <Book className="h-4 w-4" />
+                      <div>
+                        <Label>Tutorial Guide</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Restart the tutorial guide
+                        </p>
+                      </div>
                     </div>
-                    <Switch />
+                    <Button variant="outline" onClick={() => setShowTutorial(true)}>
+                      Start Tutorial
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -101,19 +125,65 @@ export default function SettingsPage() {
             >
               <Card>
                 <CardHeader>
-                  <CardTitle>Default Link Settings</CardTitle>
+                  <CardTitle>Display & Accessibility</CardTitle>
                   <CardDescription>
-                    Set default options for new links
+                    Customize your viewing experience
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <Label>Auto-publish new links</Label>
+                    <div className="flex items-center gap-2">
+                      <Moon className="h-4 w-4" />
+                      <Label>Dark Mode</Label>
+                    </div>
+                    <Switch />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Smartphone className="h-4 w-4" />
+                      <div>
+                        <Label>Mobile View</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Optimize interface for mobile devices
+                        </p>
+                      </div>
+                    </div>
                     <Switch defaultChecked />
                   </div>
-                  <div>
-                    <Label>Default Custom Domain</Label>
-                    <Input placeholder="yourdomain.com" />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Bell className="h-4 w-4" />
+                      <Label>Notifications</Label>
+                    </div>
+                    <Switch />
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle>Link Settings</CardTitle>
+                  <CardDescription>
+                    Configure default link options
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Globe className="h-4 w-4" />
+                      <Label>Default Custom Domain</Label>
+                    </div>
+                    <Input placeholder="yourdomain.com" className="max-w-[200px]" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Auto-publish new links</Label>
+                    <Switch defaultChecked />
                   </div>
                 </CardContent>
               </Card>
