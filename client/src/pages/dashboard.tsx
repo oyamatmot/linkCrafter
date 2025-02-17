@@ -188,7 +188,10 @@ export default function Dashboard() {
                   {form.watch("hasPassword") && (
                     <div>
                       <Label>Password</Label>
-                      <PasswordInput {...form.register("password")} />
+                      <PasswordInput 
+                        placeholder="Enter password"
+                        {...form.register("password")} 
+                      />
                       {form.formState.errors.password && (
                         <p className="text-sm text-destructive mt-1">
                           {form.formState.errors.password.message}
