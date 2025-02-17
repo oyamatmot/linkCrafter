@@ -41,6 +41,12 @@ export default function SettingsPage() {
       [key]: value,
     };
 
+    // Update locally first for immediate feedback
+    queryClient.setQueryData(["/api/user"], (oldData: any) => ({
+      ...oldData,
+      preferences: newPreferences,
+    }));
+
     updatePreferencesMutation.mutate(newPreferences);
   };
 
@@ -220,6 +226,7 @@ export default function SettingsPage() {
                       onChange={(e) => handlePreferenceChange("defaultCustomDomain", e.target.value)}
                       placeholder="yourdomain.com"
                       className="max-w-[200px]"
+                      type="text"
                     />
                   </div>
                 </CardContent>
