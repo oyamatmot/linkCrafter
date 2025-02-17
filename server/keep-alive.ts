@@ -1,5 +1,5 @@
 
-import { WebSocket } from "ws";
+import WebSocket from "ws";
 import { storage } from "./storage";
 import chalk from "chalk";
 
