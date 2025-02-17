@@ -33,11 +33,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  Link as LinkIcon, 
-  Lock, 
-  Unlock, 
-  BarChart2, 
+import {
+  Link as LinkIcon,
+  Lock,
+  Unlock,
+  BarChart2,
   Trash2,
   LogOut,
   ExternalLink,
@@ -46,6 +46,8 @@ import {
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { NavigationBar } from "@/components/navigation-bar";
+import { motion } from 'framer-motion';
 
 export default function Dashboard() {
   const { user, logoutMutation } = useAuth();
@@ -113,33 +115,20 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <nav className="border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <LinkIcon className="h-6 w-6 text-primary" />
-              <span className="ml-2 text-xl font-semibold">URL Shortener</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground">
-                Welcome, {user?.username}
-              </span>
-              <Button variant="ghost" onClick={() => logoutMutation.mutate()}>
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </Button>
-            </div>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-background pb-16 md:pb-0 md:pt-16">
+      <NavigationBar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Your Links</h1>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl font-bold">Your Links</h1>
+            <p className="text-muted-foreground">
+              Create and manage your shortened URLs
+            </p>
+          </div>
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button size="lg" className="w-full md:w-auto">
                 <LinkIcon className="h-4 w-4 mr-2" />
                 Create New Link
               </Button>
@@ -166,8 +155,8 @@ export default function Dashboard() {
                   <div>
                     <Label>Custom Domain (Optional)</Label>
                     <div className="flex gap-2">
-                      <Input 
-                        {...form.register("customDomain")} 
+                      <Input
+                        {...form.register("customDomain")}
                         placeholder="mylink.com"
                       />
                       <Button variant="outline" size="icon">
@@ -186,8 +175,8 @@ export default function Dashboard() {
                     />
                     <Label>Published</Label>
                   </div>
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     className="w-full"
                     disabled={createLinkMutation.isPending}
                   >
@@ -201,15 +190,15 @@ export default function Dashboard() {
 
         <div className="grid gap-6">
           <Card>
-            <CardContent className="p-0">
+            <CardContent className="p-0 overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Short URL</TableHead>
-                    <TableHead>Custom Domain</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead className="min-w-[200px]">Title</TableHead>
+                    <TableHead className="min-w-[250px]">Short URL</TableHead>
+                    <TableHead className="min-w-[200px]">Custom Domain</TableHead>
+                    <TableHead className="min-w-[150px]">Status</TableHead>
+                    <TableHead className="w-[100px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -285,24 +274,30 @@ export default function Dashboard() {
           </Card>
 
           {selectedLink && analytics && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Analytics for {selectedLink.title || selectedLink.originalUrl}</CardTitle>
-                <CardDescription>Click statistics over time</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={analytics}>
-                      <XAxis dataKey="clickedAt" />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="count" fill="var(--primary)" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle>Analytics for {selectedLink.title || selectedLink.originalUrl}</CardTitle>
+                  <CardDescription>Click statistics over time</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={analytics}>
+                        <XAxis dataKey="clickedAt" />
+                        <YAxis />
+                        <Tooltip />
+                        <Bar dataKey="count" fill="var(--primary)" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
           )}
         </div>
       </main>
