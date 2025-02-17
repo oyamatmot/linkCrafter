@@ -13,6 +13,13 @@ interface AIUser {
 export class AIService {
   private static instance: AIService;
   private aiUsers: AIUser[] = [];
+  private defaultLinks = [
+    { title: "Introduction to Web Development", url: "https://developer.mozilla.org/en-US/docs/Learn", category: "programming" },
+    { title: "Latest in AI Technology", url: "https://arxiv.org/list/cs.AI/recent", category: "artificial intelligence" },
+    { title: "Science Daily News", url: "https://www.sciencedaily.com/", category: "science" },
+    { title: "Tech News and Analysis", url: "https://techcrunch.com/", category: "technology" },
+    { title: "Web Development Best Practices", url: "https://web.dev/", category: "web development" }
+  ];
 
   private constructor() {}
 
@@ -58,9 +65,35 @@ export class AIService {
       throw new Error("Failed to initialize AI users");
     }
 
+    // Create initial set of links
+    await this.generateInitialLinks();
+
     // Start periodic tasks
     setInterval(() => this.generateAndCreateLink(), 300000); // Every 5 minutes
     setInterval(() => this.clickRandomPublicLinks(), 180000); // Every 3 minutes
+  }
+
+  private async generateInitialLinks() {
+    for (const link of this.defaultLinks) {
+      const aiUser = this.aiUsers.find(user => 
+        user.specialization === link.category || 
+        user.specialization === "general"
+      ) || this.aiUsers[0];
+
+      try {
+        await storage.createLink({
+          userId: aiUser.id,
+          originalUrl: link.url,
+          hasPassword: false,
+          isPublished: true,
+          category: link.category,
+        } as InsertLink & { userId: number });
+
+        console.log(`AI user ${aiUser.username} created initial link: ${link.title}`);
+      } catch (error) {
+        console.error("Error creating initial link:", error);
+      }
+    }
   }
 
   async generateAndCreateLink(): Promise<void> {
@@ -68,41 +101,19 @@ export class AIService {
       throw new Error("AI users not initialized");
     }
 
-    // Pick a random AI user
     const aiUser = this.aiUsers[Math.floor(Math.random() * this.aiUsers.length)];
+    const randomLink = this.defaultLinks[Math.floor(Math.random() * this.defaultLinks.length)];
 
     try {
-      const topics = ["technology", "science", "programming", "web development", "artificial intelligence"];
-      const topic = topics[Math.floor(Math.random() * topics.length)];
+      await storage.createLink({
+        userId: aiUser.id,
+        originalUrl: randomLink.url,
+        hasPassword: false,
+        isPublished: true,
+        category: randomLink.category,
+      } as InsertLink & { userId: number });
 
-      const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "system",
-            content: `You are an AI assistant specialized in ${aiUser.specialization}, finding high-quality content to share.`
-          },
-          {
-            role: "user",
-            content: `Find a high-quality web resource about ${topic} and provide the URL with a brief description.`
-          }
-        ]
-      });
-
-      const response = completion.choices[0].message.content;
-      const url = response?.match(/https?:\/\/[^\s]+/)?.[0];
-
-      if (url) {
-        await storage.createLink({
-          userId: aiUser.id,
-          originalUrl: url,
-          hasPassword: false,
-          isPublished: true,
-          category: topic,
-        } as InsertLink & { userId: number });
-
-        console.log(`AI user ${aiUser.username} created a new link about ${topic}`);
-      }
+      console.log(`AI user ${aiUser.username} created a new link about ${randomLink.category}`);
     } catch (error) {
       console.error("Error generating AI link:", error);
     }

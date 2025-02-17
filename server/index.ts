@@ -43,7 +43,7 @@ app.use((req, res, next) => {
     if (path.startsWith("/api")) {
       const method = chalk.bold.blue(`[${req.method}]`);
       const pathText = chalk.green(path);
-      const status = res.statusCode < 400 
+      const status = res.statusCode < 400
         ? chalk.bold.green(`[${res.statusCode}]`)
         : chalk.bold.red(`[${res.statusCode}]`);
       const durationText = chalk.yellow(`⚡${duration}ms`);
@@ -77,18 +77,11 @@ app.use((req, res, next) => {
     await aiService.initialize();
     console.log(chalk.green("✓ AI Service initialized"));
 
-    // Generate initial AI links
-    const topics = ["technology", "science", "programming", "web development", "artificial intelligence"];
-    for (const topic of topics) {
-      await aiService.generateAndCreateLink(topic);
-    }
-
     // Schedule AI tasks with shorter intervals for testing
     setInterval(async () => {
       try {
-        const randomTopic = topics[Math.floor(Math.random() * topics.length)];
-        await aiService.generateAndCreateLink(randomTopic);
-        console.log(chalk.blue("🤖 AI generated new link for topic:", randomTopic));
+        await aiService.generateAndCreateLink();
+        console.log(chalk.blue("🤖 AI generated new link"));
       } catch (error) {
         console.error(chalk.red("Error in AI link generation:"), error);
       }
