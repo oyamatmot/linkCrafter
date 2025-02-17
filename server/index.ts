@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import chalk from "chalk";
 
 const app = express();
 app.use(express.json());
@@ -20,16 +21,26 @@ app.use((req, res, next) => {
   res.on("finish", () => {
     const duration = Date.now() - start;
     if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
+      const method = chalk.bold.blue(req.method);
+      const pathText = chalk.green(path);
+      const status = res.statusCode < 400 
+        ? chalk.bold.green(res.statusCode)
+        : chalk.bold.red(res.statusCode);
+      const durationText = chalk.yellow(`${duration}ms`);
+
+      let logLine = `${method} ${pathText} ${status} in ${durationText}`;
+
       if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+        const jsonText = chalk.gray(JSON.stringify(capturedJsonResponse));
+        logLine += ` :: ${jsonText}`;
       }
 
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
+      if (logLine.length > 120) {
+        logLine = logLine.slice(0, 119) + chalk.gray("…");
       }
 
-      log(logLine);
+      const timestamp = new Date().toLocaleTimeString();
+      console.log(chalk.gray(`[${timestamp}]`), logLine);
     }
   });
 
@@ -42,24 +53,32 @@ app.use((req, res, next) => {
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
-
+    console.error(chalk.red("Error:"), chalk.red(err.stack || err));
     res.status(status).json({ message });
-    throw err;
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client
   const PORT = 5000;
   server.listen(PORT, "0.0.0.0", () => {
-    log(`serving on port ${PORT}`);
+    console.log(
+      chalk.cyan("[Server]"),
+      chalk.green(`serving on port ${PORT}`)
+    );
   });
+
+  // Auto-monitoring system
+  setInterval(() => {
+    const uptime = process.uptime();
+    const memoryUsage = process.memoryUsage();
+    console.log(
+      chalk.magenta("[Monitor]"),
+      chalk.blue(`Uptime: ${Math.floor(uptime / 60)}m ${Math.floor(uptime % 60)}s`),
+      chalk.blue(`Memory: ${Math.round(memoryUsage.heapUsed / 1024 / 1024)}MB`)
+    );
+  }, 60000); // Check every minute
 })();

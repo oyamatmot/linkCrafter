@@ -72,6 +72,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(analytics);
   });
 
+  // Add this new endpoint after the analytics endpoint
+  app.get("/api/leaderboard", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    const users = await storage.getAllUsers();
+    const userLinks = await Promise.all(
+      users.map(async (user) => ({
+        username: user.username,
+        links: await storage.getUserLinks(user.id),
+      }))
+    );
+
+    const leaderboard = userLinks
+      .map(({ username, links }) => ({
+        username,
+        totalClicks: links.reduce((acc, link) => acc + link.clicks, 0),
+      }))
+      .sort((a, b) => b.totalClicks - a.totalClicks)
+      .slice(0, 10);
+
+    res.json(leaderboard);
+  });
+
   // Redirect routes
   app.get("/s/:shortCode", async (req, res) => {
     const link = await storage.getLinkByShortCode(req.params.shortCode);
