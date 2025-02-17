@@ -88,16 +88,16 @@ export function NavigationBar() {
           damping: 20,
         }}
         className={cn(
-          "fixed bottom-4 left-1/2 -translate-x-1/2 z-50",
+          "fixed bottom-8 left-1/2 -translate-x-1/2 z-50",
           "transition-all duration-300 ease-in-out",
-          isExpanded ? "w-full max-w-xl" : "w-16",
+          isExpanded ? "w-full max-w-xl px-4" : "w-16",
         )}
       >
         <motion.div
           layout
           className={cn(
             "backdrop-blur-xl bg-background/80 shadow-lg",
-            "mx-4 rounded-full border",
+            "rounded-full border",
             "transition-all duration-300 ease-in-out"
           )}
         >
