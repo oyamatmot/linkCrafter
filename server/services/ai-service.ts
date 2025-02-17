@@ -55,10 +55,10 @@ export class AIService {
           isAI: true,
           role: "ai",
           preferences: {
-            darkMode: false,
-            notifications: false,
+            darkMode: true,
+            notifications: true,
             smartSearch: true,
-            selfMonitoring: false,
+            selfMonitoring: true,
             useDefaultCustomDomain: false,
           }
         });
