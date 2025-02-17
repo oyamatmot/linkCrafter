@@ -50,6 +50,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recha
 import { NavigationBar } from "@/components/navigation-bar";
 import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
+import { PasswordInput } from "@/components/ui/password-input";
 
 
 export default function Dashboard() {
@@ -187,7 +188,12 @@ export default function Dashboard() {
                   {form.watch("hasPassword") && (
                     <div>
                       <Label>Password</Label>
-                      <Input type="password" {...form.register("password")} />
+                      <PasswordInput {...form.register("password")} />
+                      {form.formState.errors.password && (
+                        <p className="text-sm text-destructive mt-1">
+                          {form.formState.errors.password.message}
+                        </p>
+                      )}
                     </div>
                   )}
                   <div className="flex items-center gap-2">

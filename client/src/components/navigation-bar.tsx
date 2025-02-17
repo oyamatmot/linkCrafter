@@ -45,7 +45,7 @@ export function NavigationBar() {
         <div className="flex items-center justify-between h-16">
           <div className="hidden md:flex items-center gap-2">
             <LinkIcon className="h-6 w-6 text-primary" />
-            <span className="text-xl font-semibold">URL Shortener</span>
+            <span className="text-xl font-semibold">LinkCrafter</span>
           </div>
 
           <div className="flex items-center justify-around md:justify-center flex-1 md:flex-none gap-1 md:gap-2">
@@ -90,6 +90,11 @@ export function NavigationBar() {
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
+        </div>
+        <div className="flex justify-center text-xs text-muted-foreground py-2 border-t">
+          <Link href="/privacy-policy" className="hover:text-primary mx-2">Privacy Policy</Link>
+          <span>•</span>
+          <Link href="/terms-of-service" className="hover:text-primary mx-2">Terms of Service</Link>
         </div>
       </div>
     </nav>

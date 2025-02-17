@@ -11,6 +11,8 @@ import HomePage from "@/pages/home-page";
 import Analytics from "@/pages/analytics";
 import Search from "@/pages/search";
 import Settings from "@/pages/settings";
+import PrivacyPolicy from "@/pages/privacy-policy";
+import TermsOfService from "@/pages/terms-of-service";
 import { ProtectedRoute } from "./lib/protected-route";
 
 function Router() {
@@ -21,6 +23,8 @@ function Router() {
       <ProtectedRoute path="/analytics" component={Analytics} />
       <ProtectedRoute path="/search" component={Search} />
       <ProtectedRoute path="/settings" component={Settings} />
+      <Route path="/privacy-policy" component={PrivacyPolicy} />
+      <Route path="/terms-of-service" component={TermsOfService} />
       <Route path="/" component={HomePage} />
       <Route component={NotFound} />
     </Switch>

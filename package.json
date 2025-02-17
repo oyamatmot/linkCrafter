@@ -1,7 +1,8 @@
 {
-  "name": "rest-express",
+  "name": "LINKCRAFTER",
   "version": "1.0.0",
   "type": "module",
+  "author": "Mot",
   "license": "MIT",
   "scripts": {
     "dev": "tsx server/index.ts",

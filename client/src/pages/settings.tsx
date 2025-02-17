@@ -185,18 +185,6 @@ export default function SettingsPage() {
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Smartphone className="h-4 w-4" />
-                      <div>
-                        <Label>Mobile View</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Optimize interface for mobile devices
-                        </p>
-                      </div>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
                       <Bell className="h-4 w-4" />
                       <Label>Notifications</Label>
                     </div>
@@ -233,10 +221,6 @@ export default function SettingsPage() {
                       placeholder="yourdomain.com"
                       className="max-w-[200px]"
                     />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Label>Auto-publish new links</Label>
-                    <Switch defaultChecked />
                   </div>
                 </CardContent>
               </Card>
