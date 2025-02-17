@@ -6,6 +6,7 @@ import { nanoid } from "nanoid";
 const MemoryStore = createMemoryStore(session);
 
 export interface IStorage {
+  getAllUsers(): Promise<User[]>;
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
@@ -30,6 +31,10 @@ export class MemStorage implements IStorage {
   private clicks: Map<number, Click>;
   private currentId: { users: number; links: number; clicks: number };
   readonly sessionStore: session.Store;
+
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
+  }
 
   constructor() {
     this.users = new Map();
