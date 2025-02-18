@@ -51,32 +51,22 @@ export default function AuthPage() {
 
   const handleSocialLogin = async (provider: 'github' | 'google' | 'facebook') => {
     try {
-      // Mock social login by saving to JSON files
       const mockUser = {
         username: `${provider}_user_${Math.random().toString(36).slice(2, 8)}`,
         provider,
         rememberMe,
-        timestamp: new Date().toISOString()
       };
 
-      const response = await fetch('/api/auth/social', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider, user: mockUser })
-      });
-
-      if (!response.ok) throw new Error();
-
-      toast({
-        title: "Success",
-        description: `Logged in with ${provider.charAt(0).toUpperCase() + provider.slice(1)}`,
-      });
-
-      // Auto-login after social auth
+      // Direct login without saving to JSON
       loginMutation.mutate({
         username: mockUser.username,
         password: "social_auth_password",
         rememberMe,
+      });
+
+      toast({
+        title: "Success",
+        description: `Logged in with ${provider.charAt(0).toUpperCase() + provider.slice(1)}`,
       });
     } catch (error) {
       toast({
