@@ -296,6 +296,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
+  // Add new boost status endpoint
+  app.get("/api/boost/status", authenticateUser, async (req: Request, res: Response) => {
+    try {
+      const { linkId } = req.query;
+      if (!linkId) {
+        return res.status(400).json({ error: "Missing linkId" });
+      }
+
+      const link = await storage.getLink(parseInt(linkId as string));
+      if (!link) {
+        return res.status(404).json({ error: "Link not found" });
+      }
+
+      const recentClicks = await storage.getLinkClicks(link.id);
+      const latestClick = recentClicks[recentClicks.length - 1];
+
+      if (latestClick) {
+        res.json({
+          message: `🤖 Click registered from ${latestClick.userAgent} at ${new Date(latestClick.clickedAt).toLocaleTimeString()}`,
+        });
+      } else {
+        res.json({ message: null });
+      }
+    } catch (error) {
+      console.error("Error in boost status endpoint:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Add notifications endpoint
+  app.get("/api/notifications", authenticateUser, async (req: Request, res: Response) => {
+    try {
+      const user = await storage.getUserById(req.user!.id);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Get user's links
+      const links = await storage.getUserLinks(user.id);
+      const notifications = [];
+
+      // Get recent activity
+      for (const link of links) {
+        const clicks = await storage.getLinkClicks(link.id);
+        if (clicks.length > 0) {
+          notifications.push({
+            id: Math.random().toString(36).substr(2, 9),
+            type: "click",
+            title: "New Clicks Detected",
+            message: `Your link received ${clicks.length} new clicks`,
+            linkId: link.id,
+            timestamp: new Date().toISOString(),
+            read: false,
+          });
+        }
+      }
+
+      res.json(notifications);
+    } catch (error) {
+      console.error("Error in notifications endpoint:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -13,6 +13,7 @@ import Search from "@/pages/search";
 import Settings from "@/pages/settings";
 import TeamPage from "@/pages/team";
 import Boost from "@/pages/boost";
+import Notifications from "@/pages/notifications";
 import PrivacyPolicy from "@/pages/privacy-policy";
 import TermsOfService from "@/pages/terms-of-service";
 import { ProtectedRoute } from "./lib/protected-route";
@@ -38,6 +39,9 @@ function Router() {
       </Route>
       <Route path="/boost">
         <ProtectedRoute component={Boost} path="/boost" />
+      </Route>
+      <Route path="/notifications">
+        <ProtectedRoute component={Notifications} path="/notifications" />
       </Route>
       <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/terms-of-service" component={TermsOfService} />

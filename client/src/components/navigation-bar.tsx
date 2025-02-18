@@ -9,12 +9,12 @@ import {
   Settings,
   Search,
   LogOut,
-  User,
-  Users,
   Menu,
   Rocket,
+  Bell
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { useQuery } from "@tanstack/react-query";
 
 export function NavigationBar() {
   const [location] = useLocation();
@@ -22,6 +22,13 @@ export function NavigationBar() {
   const [isVisible, setIsVisible] = useState(true);
   const [isExpanded, setIsExpanded] = useState(true);
   const [lastInteraction, setLastInteraction] = useState(Date.now());
+
+  const { data: notifications = [] } = useQuery<any[]>({
+    queryKey: ["/api/notifications"],
+    refetchInterval: 30000,
+  });
+
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   useEffect(() => {
     const hideTimer = setInterval(() => {
@@ -58,24 +65,25 @@ export function NavigationBar() {
       icon: BarChart2,
     },
     {
-      title: "Team",
-      href: "/team",
-      icon: Users,
-    },
-    {
       title: "Search",
       href: "/search",
       icon: Search,
     },
     {
-      title: "Settings",
-      href: "/settings",
-      icon: Settings,
-    },
-    {
       title: "Boost",
       href: "/boost",
       icon: Rocket,
+    },
+    {
+      title: "Notifications",
+      href: "/notifications",
+      icon: Bell,
+      badge: unreadCount,
+    },
+    {
+      title: "Settings",
+      href: "/settings",
+      icon: Settings,
     },
   ];
 
@@ -127,6 +135,11 @@ export function NavigationBar() {
                         )}
                       >
                         <item.icon className="h-5 w-5" />
+                        {item.badge && item.badge > 0 && (
+                          <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-xs flex items-center justify-center text-primary-foreground">
+                            {item.badge}
+                          </span>
+                        )}
                         {isActive && (
                           <motion.div
                             layoutId="active-pill"
