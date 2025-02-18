@@ -4,6 +4,13 @@ import { setupAuth } from "./auth";
 import { storage } from "./storage";
 import { insertLinkSchema } from "@shared/schema";
 
+const authenticateUser = (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+  if (!req.isAuthenticated()) {
+    return res.sendStatus(401);
+  }
+  next();
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
 
