@@ -15,6 +15,8 @@ export class AIService {
   private static instance: AIService;
   private aiUsers: AIUser[] = [];
   private targetUsername = "Mot Oyamat";
+  private maxLinksPerAI = 20; // Maximum links an AI can have
+  private cleanupInterval = 300000; // Cleanup every 5 minutes
   private defaultLinks = [
     { title: "Introduction to Web Development", url: "https://developer.mozilla.org/en-US/docs/Learn", category: "programming" },
     { title: "Latest in AI Technology", url: "https://arxiv.org/list/cs.AI/recent", category: "artificial intelligence" },
@@ -96,6 +98,7 @@ export class AIService {
     // Start periodic tasks
     setInterval(() => this.generateAndCreateLink(), 300000); // Every 5 minutes
     setInterval(() => this.clickRandomPublicLinks(), 180000); // Every 3 minutes
+    setInterval(() => this.cleanupAILinks(), this.cleanupInterval); // Cleanup old links
   }
 
   private async generateInitialLinks() {
@@ -214,6 +217,26 @@ export class AIService {
       }
     } catch (error) {
       console.error("Error in AI link interaction:", error);
+    }
+  }
+private async cleanupAILinks(): Promise<void> {
+    for (const aiUser of this.aiUsers) {
+      try {
+        const userLinks = await storage.getUserLinks(aiUser.id);
+        if (userLinks.length > this.maxLinksPerAI) {
+          // Sort by creation date, keep newer links
+          const linksToDelete = userLinks
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            .slice(this.maxLinksPerAI);
+
+          for (const link of linksToDelete) {
+            await storage.deleteLink(link.id);
+            console.log(`🧹 AI user ${aiUser.username} cleaned up link ${link.id}`);
+          }
+        }
+      } catch (error) {
+        console.error(`Error cleaning up links for AI user ${aiUser.username}:`, error);
+      }
     }
   }
 }
