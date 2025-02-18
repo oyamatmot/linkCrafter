@@ -31,27 +31,29 @@ export function NavigationBar() {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   useEffect(() => {
-    const hideTimer = setInterval(() => {
-      if (Date.now() - lastInteraction > 3000) {
-        setIsExpanded(false);
-      }
-    }, 1000);
-
-    const touchHandler = () => {
+    let hideTimer: NodeJS.Timeout;
+    
+    const resetTimer = () => {
       setIsExpanded(true);
       setIsVisible(true);
       setLastInteraction(Date.now());
+      
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => {
+        setIsExpanded(false);
+      }, 3000);
     };
 
-    document.addEventListener('touchstart', touchHandler);
-    document.addEventListener('mousemove', touchHandler);
+    resetTimer();
+    document.addEventListener('touchstart', resetTimer);
+    document.addEventListener('mousemove', resetTimer);
 
     return () => {
-      clearInterval(hideTimer);
-      document.removeEventListener('touchstart', touchHandler);
-      document.removeEventListener('mousemove', touchHandler);
+      clearTimeout(hideTimer);
+      document.removeEventListener('touchstart', resetTimer);
+      document.removeEventListener('mousemove', resetTimer);
     };
-  }, [lastInteraction]);
+  }, []);
 
   const navigationItems = [
     {

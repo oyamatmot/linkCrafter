@@ -59,9 +59,13 @@ export default function SettingsPage() {
   const handleLogout = async () => {
     try {
       await logoutMutation.mutateAsync();
-      setLocation('/auth');
+      window.location.href = '/auth';
     } catch (error) {
-      // Error is handled by the mutation
+      toast({
+        title: "Logout failed",
+        description: "Please try again",
+        variant: "destructive"
+      });
     }
   };
 
