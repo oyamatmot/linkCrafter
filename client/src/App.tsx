@@ -17,9 +17,9 @@ import Notifications from "@/pages/notifications";
 import PrivacyPolicy from "@/pages/privacy-policy";
 import TermsOfService from "@/pages/terms-of-service";
 import { ProtectedRoute } from "./lib/protected-route";
-import FacebookLoginPage from "@/pages/auth/facebook"; // Add import for Facebook login page
-import GithubLoginPage from "@/pages/auth/github";   // Add import for Github login page
-import GoogleLoginPage from "@/pages/auth/google";   // Add import for Google login page
+import FacebookLoginPage from "@/pages/auth/facebook-login"; // Add import for Facebook login page
+import GithubLoginPage from "@/pages/auth/github-login";   // Add import for Github login page
+import GoogleLoginPage from "@/pages/auth/google-login";   // Add import for Google login page
 import React, { ErrorBoundary } from 'react';
 import { toast } from './hooks/use-toast';
 
