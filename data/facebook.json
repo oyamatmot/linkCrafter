@@ -8,5 +8,11 @@
     "username": "facebook_user_sji5lz",
     "provider": "facebook",
     "timestamp": "2025-02-18T05:37:07.113Z"
+  },
+  {
+    "username": "facebook_user_jqg5o9",
+    "provider": "facebook",
+    "rememberMe": false,
+    "timestamp": "2025-02-18T05:58:16.516Z"
   }
 ]
