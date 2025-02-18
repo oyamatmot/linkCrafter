@@ -176,34 +176,3 @@ export function NavigationBar() {
     </AnimatePresence>
   );
 }
-
-// Basic Boost Page Component (needs further implementation based on requirements)
-function BoostPage() {
-  const [linkId, setLinkId] = useState('');
-  const [clickCount, setClickCount] = useState('');
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Add your click boosting logic here.  This is a placeholder.
-    console.log('Boosting link:', linkId, 'with', clickCount, 'clicks');
-  };
-
-  return (
-    <div>
-      <h1>Boost Your Link</h1>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Link ID:
-          <input type="text" value={linkId} onChange={e => setLinkId(e.target.value)} />
-        </label>
-        <label>
-          Click Count:
-          <input type="number" value={clickCount} onChange={e => setClickCount(e.target.value)} />
-        </label>
-        <button type="submit">Boost</button>
-      </form>
-    </div>
-  );
-}
-
-export default BoostPage;
