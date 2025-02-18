@@ -21,12 +21,24 @@ function Router() {
   return (
     <Switch>
       <Route path="/auth" component={AuthPage} />
-      <ProtectedRoute path="/dashboard" component={Dashboard} />
-      <ProtectedRoute path="/analytics" component={Analytics} />
-      <ProtectedRoute path="/team" component={TeamPage} />
-      <ProtectedRoute path="/search" component={Search} />
-      <ProtectedRoute path="/settings" component={Settings} />
-      <ProtectedRoute path="/boost" component={Boost} />
+      <Route path="/dashboard">
+        <ProtectedRoute component={Dashboard} path="/dashboard" />
+      </Route>
+      <Route path="/analytics">
+        <ProtectedRoute component={Analytics} path="/analytics" />
+      </Route>
+      <Route path="/team">
+        <ProtectedRoute component={TeamPage} path="/team" />
+      </Route>
+      <Route path="/search">
+        <ProtectedRoute component={Search} path="/search" />
+      </Route>
+      <Route path="/settings">
+        <ProtectedRoute component={Settings} path="/settings" />
+      </Route>
+      <Route path="/boost">
+        <ProtectedRoute component={Boost} path="/boost" />
+      </Route>
       <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/terms-of-service" component={TermsOfService} />
       <Route path="/" component={HomePage} />
@@ -35,7 +47,7 @@ function Router() {
   );
 }
 
-function App() {
+export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="system" storageKey="url-shortener-theme">
@@ -47,5 +59,3 @@ function App() {
     </QueryClientProvider>
   );
 }
-
-export default App;
