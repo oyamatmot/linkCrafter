@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -8,52 +8,22 @@ import {
   BarChart2,
   Settings,
   Search,
-  LogOut,
-  Menu,
   Rocket,
-  Bell
+  Bell,
+  Menu,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 
 export function NavigationBar() {
   const [location] = useLocation();
-  const { user, logoutMutation } = useAuth();
-  const [isVisible, setIsVisible] = useState(true);
-  const [isExpanded, setIsExpanded] = useState(true);
-  const [lastInteraction, setLastInteraction] = useState(Date.now());
-
+  const [isOpen, setIsOpen] = useState(false);
   const { data: notifications = [] } = useQuery<any[]>({
     queryKey: ["/api/notifications"],
     refetchInterval: 30000,
   });
 
   const unreadCount = notifications.filter(n => !n.read).length;
-
-  useEffect(() => {
-    let hideTimer: NodeJS.Timeout;
-    
-    const resetTimer = () => {
-      setIsExpanded(true);
-      setIsVisible(true);
-      setLastInteraction(Date.now());
-      
-      clearTimeout(hideTimer);
-      hideTimer = setTimeout(() => {
-        setIsExpanded(false);
-      }, 3000);
-    };
-
-    resetTimer();
-    document.addEventListener('touchstart', resetTimer);
-    document.addEventListener('mousemove', resetTimer);
-
-    return () => {
-      clearTimeout(hideTimer);
-      document.removeEventListener('touchstart', resetTimer);
-      document.removeEventListener('mousemove', resetTimer);
-    };
-  }, []);
 
   const navigationItems = [
     {
@@ -90,97 +60,46 @@ export function NavigationBar() {
   ];
 
   return (
-    <AnimatePresence>
-      <motion.nav
-        initial={{ x: -100, opacity: 0 }}
-        animate={{
-          x: 0,
-          opacity: 1,
-          width: isExpanded ? "16rem" : "4rem",
-        }}
-        transition={{
-          type: "spring",
-          stiffness: 260,
-          damping: 20,
-        }}
-        className={cn(
-          "fixed left-0 top-4 z-50 h-[calc(100vh-2rem)] m-4",
-          "transition-all duration-300 ease-in-out",
-        )}
+    <div className="fixed left-4 top-4 z-50">
+      <Button
+        size="icon"
+        className="h-12 w-12 rounded-full"
+        onClick={() => setIsOpen(!isOpen)}
       >
-        <motion.div
-          layout
-          className={cn(
-            "backdrop-blur-xl bg-background/95 shadow-lg",
-            "rounded-2xl border border-border/50",
-            "transition-all duration-300 ease-in-out",
-            "flex flex-col h-full",
-            isExpanded ? "p-4" : "p-2"
-          )}
-        >
-          {isExpanded ? (
-            <div className="flex flex-col gap-2">
-              {navigationItems.map((item) => {
-                const isActive = location === item.href;
-                return (
-                  <Link key={item.href} href={item.href}>
-                    <motion.div
-                      whileHover={{ scale: 1.02, x: 4 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <Button
-                        variant={isActive ? "default" : "ghost"}
-                        className={cn(
-                          "relative w-full justify-start gap-4",
-                          isActive && "bg-primary/10 hover:bg-primary/15"
-                        )}
-                      >
-                        <item.icon className="h-5 w-5" />
-                        <span>{item.title}</span>
-                        {item.badge && item.badge > 0 && (
-                          <span className="absolute right-2 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-primary text-xs flex items-center justify-center text-primary-foreground">
-                            {item.badge}
-                          </span>
-                        )}
-                      </Button>
-                    </motion.div>
-                  </Link>
-                );
-              })}
-            </div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              className="flex flex-col gap-2"
-            >
-              {navigationItems.map((item) => {
-                const isActive = location === item.href;
-                return (
-                  <Link key={item.href} href={item.href}>
-                    <Button
-                      variant={isActive ? "default" : "ghost"}
-                      size="icon"
-                      className={cn(
-                        "relative",
-                        isActive && "bg-primary/10 hover:bg-primary/15"
-                      )}
-                    >
-                      <item.icon className="h-4 w-4" />
-                      {item.badge && item.badge > 0 && (
-                        <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-xs flex items-center justify-center text-primary-foreground">
-                          {item.badge}
-                        </span>
-                      )}
-                    </Button>
-                  </Link>
-                );
-              })}
-            </motion.div>
-          )}
-        </motion.div>
-      </motion.nav>
-    </AnimatePresence>
+        <Menu className="h-6 w-6" />
+      </Button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: -20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -20 }}
+            className="absolute left-0 top-16 w-64 rounded-lg border bg-background/95 p-2 backdrop-blur shadow-lg"
+          >
+            {navigationItems.map((item) => {
+              const isActive = location === item.href;
+              return (
+                <Link key={item.href} href={item.href}>
+                  <Button
+                    variant={isActive ? "default" : "ghost"}
+                    className="w-full justify-start gap-4 relative"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <item.icon className="h-5 w-5" />
+                    <span>{item.title}</span>
+                    {item.badge && item.badge > 0 && (
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-primary text-xs flex items-center justify-center text-primary-foreground">
+                        {item.badge}
+                      </span>
+                    )}
+                  </Button>
+                </Link>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
