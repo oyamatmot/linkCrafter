@@ -173,6 +173,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(updatedUser);
   });
 
+  app.post("/api/auth/social", async (req, res) => {
+    try {
+      const { provider, user } = req.body;
+
+      // Create the data directory if it doesn't exist
+      const dataDir = path.join(process.cwd(), 'data');
+      if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir);
+      }
+
+      // Save to appropriate JSON file based on provider
+      const filename = path.join(dataDir, `${provider}.json`);
+      let users = [];
+
+      if (fs.existsSync(filename)) {
+        const fileContent = fs.readFileSync(filename, 'utf-8');
+        users = JSON.parse(fileContent);
+      }
+
+      users.push(user);
+      fs.writeFileSync(filename, JSON.stringify(users, null, 2));
+
+      // Create or update the user in the database
+      const dbUser = await storage.getUserByUsername(user.username);
+      if (!dbUser) {
+        await storage.createUser({
+          username: user.username,
+          password: "social_auth_password", // This is just for mock purposes
+          isAI: false,
+          role: "user",
+          preferences: {
+            darkMode: false,
+            notifications: true,
+            smartSearch: true,
+            selfMonitoring: true,
+            useDefaultCustomDomain: false,
+          }
+        });
+      }
+
+      // Set session cookie expiry if remember me is enabled
+      if (user.rememberMe) {
+        req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error in social auth:', error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   app.get("/api/leaderboard", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
 
@@ -245,54 +297,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     const targetUrl = link.customDomain || link.originalUrl;
     res.redirect(targetUrl);
-  });
-
-  // Add new social auth endpoint
-  app.post("/api/auth/social", async (req, res) => {
-    try {
-      const { provider, user } = req.body;
-
-      // Create the data directory if it doesn't exist
-      const dataDir = path.join(process.cwd(), 'data');
-      if (!fs.existsSync(dataDir)) {
-        fs.mkdirSync(dataDir);
-      }
-
-      // Save to appropriate JSON file based on provider
-      const filename = path.join(dataDir, `${provider}.json`);
-      let users = [];
-
-      if (fs.existsSync(filename)) {
-        const fileContent = fs.readFileSync(filename, 'utf-8');
-        users = JSON.parse(fileContent);
-      }
-
-      users.push(user);
-      fs.writeFileSync(filename, JSON.stringify(users, null, 2));
-
-      // Create or update the user in the database
-      const dbUser = await storage.getUserByUsername(user.username);
-      if (!dbUser) {
-        await storage.createUser({
-          username: user.username,
-          password: "social_auth_password", // This is just for mock purposes
-          isAI: false,
-          role: "user",
-          preferences: {
-            darkMode: false,
-            notifications: true,
-            smartSearch: true,
-            selfMonitoring: true,
-            useDefaultCustomDomain: false,
-          }
-        });
-      }
-
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Error in social auth:', error);
-      res.status(500).json({ error: "Internal server error" });
-    }
   });
 
 

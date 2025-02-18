@@ -14,14 +14,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Link, useLocation } from "wouter";
 import { insertUserSchema } from "@shared/schema";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { SiGithub, SiGoogle, SiFacebook } from "react-icons/si";
 import { toast } from "@/hooks/use-toast";
+import { Eye, EyeOff } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 export default function AuthPage() {
   const [location, navigate] = useLocation();
   const { user, loginMutation, registerMutation } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const loginForm = useForm({
     resolver: zodResolver(insertUserSchema),
@@ -51,10 +55,10 @@ export default function AuthPage() {
       const mockUser = {
         username: `${provider}_user_${Math.random().toString(36).slice(2, 8)}`,
         provider,
+        rememberMe,
         timestamp: new Date().toISOString()
       };
 
-      // In a real app, this would be an API call
       const response = await fetch('/api/auth/social', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -71,7 +75,8 @@ export default function AuthPage() {
       // Auto-login after social auth
       loginMutation.mutate({
         username: mockUser.username,
-        password: "social_auth_password"
+        password: "social_auth_password",
+        rememberMe,
       });
     } catch (error) {
       toast({
@@ -102,7 +107,7 @@ export default function AuthPage() {
               <TabsContent value="login">
                 <form
                   onSubmit={loginForm.handleSubmit((data) =>
-                    loginMutation.mutate(data)
+                    loginMutation.mutate({ ...data, rememberMe })
                   )}
                 >
                   <div className="space-y-4">
@@ -115,11 +120,32 @@ export default function AuthPage() {
                     </div>
                     <div>
                       <Label htmlFor="login-password">Password</Label>
-                      <Input
-                        id="login-password"
-                        type="password"
-                        {...loginForm.register("password")}
+                      <div className="relative">
+                        <Input
+                          id="login-password"
+                          type={showPassword ? "text" : "password"}
+                          {...loginForm.register("password")}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2"
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4 text-muted-foreground" />
+                          ) : (
+                            <Eye className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="remember-me"
+                        checked={rememberMe}
+                        onCheckedChange={setRememberMe}
                       />
+                      <Label htmlFor="remember-me">Remember me for 30 days</Label>
                     </div>
                     <Button
                       type="submit"
@@ -144,23 +170,26 @@ export default function AuthPage() {
                       <Button
                         variant="outline"
                         onClick={() => handleSocialLogin('github')}
-                        className="w-full"
+                        className="w-full gap-2"
                       >
                         <SiGithub className="w-4 h-4" />
+                        GitHub
                       </Button>
                       <Button
                         variant="outline"
                         onClick={() => handleSocialLogin('google')}
-                        className="w-full"
+                        className="w-full gap-2"
                       >
                         <SiGoogle className="w-4 h-4" />
+                        Google
                       </Button>
                       <Button
                         variant="outline"
                         onClick={() => handleSocialLogin('facebook')}
-                        className="w-full"
+                        className="w-full gap-2"
                       >
                         <SiFacebook className="w-4 h-4" />
+                        Facebook
                       </Button>
                     </div>
                   </div>
@@ -183,11 +212,24 @@ export default function AuthPage() {
                     </div>
                     <div>
                       <Label htmlFor="register-password">Password</Label>
-                      <Input
-                        id="register-password"
-                        type="password"
-                        {...registerForm.register("password")}
-                      />
+                      <div className="relative">
+                        <Input
+                          id="register-password"
+                          type={showPassword ? "text" : "password"}
+                          {...registerForm.register("password")}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2"
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4 text-muted-foreground" />
+                          ) : (
+                            <Eye className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </button>
+                      </div>
                     </div>
                     <Button
                       type="submit"
