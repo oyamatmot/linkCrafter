@@ -72,7 +72,7 @@ export default function SettingsPage() {
   }, [user?.preferences]);
 
   return (
-    <div className="min-h-screen bg-background pb-16 md:pb-0 md:pt-16">
+    <div className="min-h-screen bg-background pl-24 lg:pl-72">
       <NavigationBar />
 
       {showTutorial && (

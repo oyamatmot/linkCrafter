@@ -90,11 +90,11 @@ export function NavigationBar() {
   return (
     <AnimatePresence>
       <motion.nav
-        initial={{ scale: 0.8, opacity: 0 }}
+        initial={{ x: -100, opacity: 0 }}
         animate={{
-          scale: 1,
+          x: 0,
           opacity: 1,
-          width: isExpanded ? "auto" : "3rem",
+          width: isExpanded ? "16rem" : "4rem",
         }}
         transition={{
           type: "spring",
@@ -102,7 +102,7 @@ export function NavigationBar() {
           damping: 20,
         }}
         className={cn(
-          "fixed bottom-6 left-1/2 -translate-x-1/2 z-50",
+          "fixed left-0 top-4 z-50 h-[calc(100vh-2rem)] m-4",
           "transition-all duration-300 ease-in-out",
         )}
       >
@@ -110,44 +110,35 @@ export function NavigationBar() {
           layout
           className={cn(
             "backdrop-blur-xl bg-background/95 shadow-lg",
-            "rounded-full border border-border/50",
+            "rounded-2xl border border-border/50",
             "transition-all duration-300 ease-in-out",
-            "flex items-center justify-center",
-            isExpanded ? "px-3" : "p-2"
+            "flex flex-col h-full",
+            isExpanded ? "p-4" : "p-2"
           )}
         >
           {isExpanded ? (
-            <div className="h-12 flex items-center justify-center gap-1">
+            <div className="flex flex-col gap-2">
               {navigationItems.map((item) => {
                 const isActive = location === item.href;
                 return (
                   <Link key={item.href} href={item.href}>
                     <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: 1.02, x: 4 }}
+                      whileTap={{ scale: 0.98 }}
                     >
                       <Button
                         variant={isActive ? "default" : "ghost"}
-                        size="icon"
                         className={cn(
-                          "relative w-10 h-10",
+                          "relative w-full justify-start gap-4",
                           isActive && "bg-primary/10 hover:bg-primary/15"
                         )}
                       >
                         <item.icon className="h-5 w-5" />
+                        <span>{item.title}</span>
                         {item.badge && item.badge > 0 && (
-                          <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-xs flex items-center justify-center text-primary-foreground">
+                          <span className="absolute right-2 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-primary text-xs flex items-center justify-center text-primary-foreground">
                             {item.badge}
                           </span>
-                        )}
-                        {isActive && (
-                          <motion.div
-                            layoutId="active-pill"
-                            className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                          />
                         )}
                       </Button>
                     </motion.div>
@@ -160,15 +151,30 @@ export function NavigationBar() {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
+              className="flex flex-col gap-2"
             >
-              <Button
-                variant="ghost"
-                size="icon"
-                className="w-8 h-8"
-                onClick={() => setIsExpanded(true)}
-              >
-                <Menu className="h-4 w-4" />
-              </Button>
+              {navigationItems.map((item) => {
+                const isActive = location === item.href;
+                return (
+                  <Link key={item.href} href={item.href}>
+                    <Button
+                      variant={isActive ? "default" : "ghost"}
+                      size="icon"
+                      className={cn(
+                        "relative",
+                        isActive && "bg-primary/10 hover:bg-primary/15"
+                      )}
+                    >
+                      <item.icon className="h-4 w-4" />
+                      {item.badge && item.badge > 0 && (
+                        <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-xs flex items-center justify-center text-primary-foreground">
+                          {item.badge}
+                        </span>
+                      )}
+                    </Button>
+                  </Link>
+                );
+              })}
             </motion.div>
           )}
         </motion.div>
