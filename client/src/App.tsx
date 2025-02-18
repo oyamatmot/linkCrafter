@@ -20,6 +20,22 @@ import { ProtectedRoute } from "./lib/protected-route";
 import FacebookLoginPage from "@/pages/auth/facebook"; // Add import for Facebook login page
 import GithubLoginPage from "@/pages/auth/github";   // Add import for Github login page
 import GoogleLoginPage from "@/pages/auth/google";   // Add import for Google login page
+import React, { ErrorBoundary } from 'react';
+import { toast } from './hooks/use-toast';
+
+class AppErrorBoundary extends React.Component {
+  componentDidCatch(error: Error) {
+    toast({
+      title: "Error",
+      description: error.message,
+      variant: "destructive"
+    });
+  }
+
+  render() {
+    return this.props.children;
+  }
+}
 
 function Router() {
   return (
@@ -68,8 +84,10 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="system" storageKey="url-shortener-theme">
         <AuthProvider>
-          <Router />
-          <Toaster />
+          <AppErrorBoundary>
+            <Router />
+            <Toaster />
+          </AppErrorBoundary>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>

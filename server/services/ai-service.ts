@@ -155,16 +155,7 @@ export class AIService {
       }
     } catch (error) {
       console.error("Error generating AI link:", error);
-      // Fallback to default links if API fails
-      const randomLink = this.defaultLinks[Math.floor(Math.random() * this.defaultLinks.length)];
-      await storage.createLink({
-        userId: aiUser.id,
-        originalUrl: randomLink.url,
-        title: randomLink.title,
-        hasPassword: false,
-        isPublished: true,
-        category: randomLink.category,
-      } as InsertLink & { userId: number });
+      throw new Error(`AI link generation failed: ${error.message}`);
     }
   }
 
@@ -219,7 +210,7 @@ export class AIService {
       console.error("Error in AI link interaction:", error);
     }
   }
-private async cleanupAILinks(): Promise<void> {
+  private async cleanupAILinks(): Promise<void> {
     for (const aiUser of this.aiUsers) {
       try {
         const userLinks = await storage.getUserLinks(aiUser.id);
