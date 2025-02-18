@@ -75,6 +75,7 @@ export class AIService {
             await storage.createLink({
               userId: user.id,
               originalUrl: link.url,
+              title: link.title,
               hasPassword: false,
               isPublished: true,
               category: link.category,
@@ -108,6 +109,7 @@ export class AIService {
         await storage.createLink({
           userId: aiUser.id,
           originalUrl: link.url,
+          title: link.title,
           hasPassword: false,
           isPublished: true,
           category: link.category,
@@ -140,6 +142,7 @@ export class AIService {
         await storage.createLink({
           userId: aiUser.id,
           originalUrl: url,
+          title: `AI Generated Resource: ${topic}`,
           hasPassword: false,
           isPublished: true,
           category: topic,
@@ -154,6 +157,7 @@ export class AIService {
       await storage.createLink({
         userId: aiUser.id,
         originalUrl: randomLink.url,
+        title: randomLink.title,
         hasPassword: false,
         isPublished: true,
         category: randomLink.category,
@@ -162,7 +166,7 @@ export class AIService {
   }
 
   async boostLinkClicks(linkId: number, targetClicks: number): Promise<void> {
-    const link = await storage.getLinkById(linkId);
+    const link = await storage.getLink(linkId);
     if (!link) return;
 
     const currentClicks = await storage.getLinkClicks(linkId);
@@ -177,7 +181,7 @@ export class AIService {
         userAgent: `${aiUser.username} Bot`,
         ipAddress: "127.0.0.1"
       });
-      
+
       // Add small delay between clicks
       await new Promise(resolve => setTimeout(resolve, 100));
     }

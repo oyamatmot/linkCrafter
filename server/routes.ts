@@ -1,12 +1,13 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { storage } from "./storage";
 import { insertLinkSchema } from "@shared/schema";
+import { aiService } from "./services/ai-service";
 
-const authenticateUser = (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+const authenticateUser = (req: Request, res: Response, next: NextFunction) => {
   if (!req.isAuthenticated()) {
-    return res.sendStatus(401);
+    return res.status(401).json({ error: "Unauthorized" });
   }
   next();
 };
@@ -104,11 +105,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     if (searchType === "links") {
       const links = await storage.getAllLinks();
-      const filteredLinks = links.filter(link =>
-        link.title?.toLowerCase().includes(query.toLowerCase()) ||
-        link.originalUrl.toLowerCase().includes(query.toLowerCase()) ||
-        link.shortCode.toLowerCase().includes(query.toLowerCase())
-      );
+      const filteredLinks = links.filter(link => {
+        const searchTerms = [
+          link.originalUrl.toLowerCase(),
+          link.shortCode.toLowerCase(),
+          // Only include title in search if it exists
+          ...(link.title ? [link.title.toLowerCase()] : [])
+        ];
+        return searchTerms.some(term => term.includes(query.toLowerCase()));
+      });
       res.json(filteredLinks);
     } else if (searchType === "users") {
       const users = await storage.getAllUsers();
@@ -195,23 +200,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Redirect routes
-  app.post("/api/boost", authenticateUser, async (req, res) => {
-    const { linkId, targetClicks } = req.body;
-    const link = await storage.getLinkById(linkId);
-    
-    if (!link) {
-      return res.status(404).json({ error: "Link not found" });
-    }
-    
-    if (link.userId !== req.user.id) {
-      return res.status(403).json({ error: "Not authorized" });
-    }
+  app.post("/api/boost", authenticateUser, async (req: Request, res: Response) => {
+    try {
+      const { linkId, targetClicks } = req.body;
 
-    // Queue the boost task
-    aiService.boostLinkClicks(linkId, targetClicks)
-      .catch(console.error);
+      if (!linkId || !targetClicks) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
 
-    res.json({ success: true });
+      const link = await storage.getLink(linkId);
+
+      if (!link) {
+        return res.status(404).json({ error: "Link not found" });
+      }
+
+      if (!req.user || link.userId !== req.user.id) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+
+      // Queue the boost task
+      await aiService.boostLinkClicks(linkId, targetClicks);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error in boost endpoint:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
   });
 
   app.get("/s/:shortCode", async (req, res) => {

@@ -1,4 +1,3 @@
-
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import chalk from "chalk";
@@ -7,9 +6,9 @@ export class KeepAliveService {
   private static instance: KeepAliveService;
   private wsServer: WebSocketServer;
   private clients: Set<WebSocket> = new Set();
-  private checkInterval: NodeJS.Timer;
+  private checkInterval: NodeJS.Timeout | null = null;
   private restartAttempts = 0;
-  
+
   private constructor(server: any) {
     this.wsServer = new WebSocketServer({ 
       server,
@@ -39,14 +38,14 @@ export class KeepAliveService {
 
   private async notifyUsers(message: string, type: 'error' | 'info') {
     try {
-      const users = await storage.getAllUsers();
-      for (const user of users) {
-        await storage.createNotification(user.id, {
-          title: type === 'error' ? 'System Error' : 'System Info',
-          message,
-          type
-        });
-      }
+      // Instead of using storage.createNotification, we'll log the notification
+      console.log(chalk.yellow(`[${type.toUpperCase()}] ${message}`));
+      // Broadcast to all connected WebSocket clients
+      this.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify({ type, message }));
+        }
+      });
     } catch (error) {
       console.error(chalk.red('Failed to send notifications:', error));
     }
@@ -63,30 +62,22 @@ export class KeepAliveService {
       } catch (error) {
         console.error(chalk.red('Health check failed:', error));
         this.restartAttempts++;
-        
+
         if (this.restartAttempts >= 3) {
           await this.notifyUsers('Application experienced issues and is attempting to restart', 'error');
-          // Kill any existing process on port 5000
-          try {
-            await new Promise((resolve) => {
-              const kill = require('child_process').spawn('kill', ['-9', `$(lsof -t -i:5000)`], {shell: true});
-              kill.on('close', resolve);
-            });
-          } catch (error) {
-            console.error('Failed to kill process:', error);
-          }
-          
-          // Restart the application
-          setTimeout(() => {
-            process.exit(1); // This will trigger Replit's auto-restart
-          }, 1000);
+          process.exit(1); // This will trigger Replit's auto-restart
         }
       }
     }, 60000); // Check every minute
   }
 
   cleanup() {
-    clearInterval(this.checkInterval);
-    this.wsServer.close();
+    if (this.checkInterval) {
+      clearInterval(this.checkInterval);
+      this.checkInterval = null;
+    }
+    this.wsServer.close(() => {
+      console.log(chalk.yellow('WebSocket server closed'));
+    });
   }
 }

@@ -1,25 +1,13 @@
+import { migrate } from "drizzle-orm/neon-serverless/migrator";
 import { db } from "./db";
-import { users, links, clicks, recentSearches } from "@shared/schema";
 
-async function migrate() {
+async function runMigration() {
   console.log("Creating database tables...");
 
   try {
-    await db.schema
-      .createTable(users)
-      .execute();
-
-    await db.schema
-      .createTable(links)
-      .execute();
-
-    await db.schema
-      .createTable(clicks)
-      .execute();
-
-    await db.schema
-      .createTable(recentSearches)
-      .execute();
+    await migrate(db, {
+      migrationsFolder: './migrations',
+    });
 
     console.log("✅ Database tables created successfully");
   } catch (error) {
@@ -28,4 +16,4 @@ async function migrate() {
   }
 }
 
-migrate().catch(console.error);
+runMigration().catch(console.error);
