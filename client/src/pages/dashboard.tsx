@@ -44,6 +44,7 @@ import {
   Copy,
   Globe,
   Loader2,
+  Hash,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
@@ -248,19 +249,23 @@ export default function Dashboard() {
                 </TableHeader>
                 <TableBody>
                   {links.map((link) => (
-                    <TableRow key={link.id}>
-                      <TableCell>{link.originalUrl}</TableCell>
-                      <TableCell>
+                    <TableRow key={link.id} className="h-12">
+                      <TableCell className="py-2">
+                        <div className="truncate max-w-[300px]" title={link.originalUrl}>
+                          {link.originalUrl}
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-2">
                         {link.customDomain ? (
                           <div className="flex items-center gap-2">
                             <Globe className="h-4 w-4 text-primary" />
-                            <span>{link.customDomain}</span>
+                            <span className="truncate max-w-[150px]">{link.customDomain}</span>
                           </div>
                         ) : (
                           <span className="text-muted-foreground text-sm">None</span>
                         )}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="py-2">
                         <div className="flex items-center gap-2">
                           {link.hasPassword ? (
                             <Lock className="h-4 w-4 text-warning" />
@@ -272,12 +277,13 @@ export default function Dashboard() {
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
+                      <TableCell className="py-2">
+                        <div className="flex items-center gap-1">
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => copyToClipboard(`${window.location.origin}/s/${link.shortCode}`)}
+                            title="Copy Link"
                           >
                             <Copy className="h-4 w-4" />
                           </Button>
@@ -285,6 +291,7 @@ export default function Dashboard() {
                             variant="ghost"
                             size="icon"
                             onClick={() => window.open(`${window.location.origin}/s/${link.shortCode}`, '_blank')}
+                            title="Open Link"
                           >
                             <ExternalLink className="h-4 w-4" />
                           </Button>
@@ -292,13 +299,26 @@ export default function Dashboard() {
                             variant="ghost"
                             size="icon"
                             onClick={() => setSelectedLink(link)}
+                            title="View Analytics"
                           >
                             <BarChart2 className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="icon"
+                            onClick={() => {
+                              toast({ title: `Link ID: ${link.id}` });
+                              copyToClipboard(link.id.toString());
+                            }}
+                            title="Copy ID"
+                          >
+                            <Hash className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => deleteLinkMutation.mutate(link.id)}
+                            title="Delete Link"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
