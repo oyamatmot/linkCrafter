@@ -15,6 +15,9 @@ import { useForm } from "react-hook-form";
 import { Link, useLocation } from "wouter";
 import { insertUserSchema } from "@shared/schema";
 import { useEffect } from "react";
+import { Separator } from "@/components/ui/separator";
+import { SiGithub, SiGoogle, SiFacebook } from "react-icons/si";
+import { toast } from "@/hooks/use-toast";
 
 export default function AuthPage() {
   const [location, navigate] = useLocation();
@@ -41,6 +44,43 @@ export default function AuthPage() {
       navigate("/dashboard");
     }
   }, [user, navigate]);
+
+  const handleSocialLogin = async (provider: 'github' | 'google' | 'facebook') => {
+    try {
+      // Mock social login by saving to JSON files
+      const mockUser = {
+        username: `${provider}_user_${Math.random().toString(36).slice(2, 8)}`,
+        provider,
+        timestamp: new Date().toISOString()
+      };
+
+      // In a real app, this would be an API call
+      const response = await fetch('/api/auth/social', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider, user: mockUser })
+      });
+
+      if (!response.ok) throw new Error();
+
+      toast({
+        title: "Success",
+        description: `Logged in with ${provider.charAt(0).toUpperCase() + provider.slice(1)}`,
+      });
+
+      // Auto-login after social auth
+      loginMutation.mutate({
+        username: mockUser.username,
+        password: "social_auth_password"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to login with social provider",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen grid md:grid-cols-2">
@@ -88,6 +128,41 @@ export default function AuthPage() {
                     >
                       Login
                     </Button>
+
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <Separator />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">
+                          Or continue with
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => handleSocialLogin('github')}
+                        className="w-full"
+                      >
+                        <SiGithub className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => handleSocialLogin('google')}
+                        className="w-full"
+                      >
+                        <SiGoogle className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => handleSocialLogin('facebook')}
+                        className="w-full"
+                      >
+                        <SiFacebook className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 </form>
               </TabsContent>

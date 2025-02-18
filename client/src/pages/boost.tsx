@@ -1,11 +1,12 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
-import { Loader2, Rocket } from "lucide-react";
+import { Loader2, Rocket, BarChart2 } from "lucide-react";
+import { Link } from "wouter";
+import { NavigationBar } from "@/components/navigation-bar";
 
 export default function Boost() {
   const [linkId, setLinkId] = useState("");
@@ -29,9 +30,9 @@ export default function Boost() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ linkId: parseInt(linkId), targetClicks: parseInt(targetClicks) }),
       });
-      
+
       if (!response.ok) throw new Error();
-      
+
       toast({
         title: "Success",
         description: "Boost request initiated successfully!",
@@ -48,50 +49,61 @@ export default function Boost() {
   };
 
   return (
-    <div className="container max-w-6xl py-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold">AI Click Booster</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Link ID</label>
-              <Input
-                type="number"
-                placeholder="Enter your link ID"
-                value={linkId}
-                onChange={(e) => setLinkId(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Target Clicks</label>
-              <Input
-                type="number"
-                placeholder="Enter target clicks"
-                value={targetClicks}
-                onChange={(e) => setTargetClicks(e.target.value)}
-              />
-            </div>
-            <Button 
-              className="w-full" 
-              onClick={handleBoost}
-              disabled={loading}
-            >
-              {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <Rocket className="h-4 w-4 mr-2" />
-              )}
-              Boost Clicks
-            </Button>
-          </CardContent>
-        </Card>
-      </motion.div>
+    <div className="min-h-screen bg-background pb-16 md:pb-0 md:pt-16">
+      <NavigationBar />
+      <div className="container max-w-6xl py-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-2xl font-bold">AI Click Booster</CardTitle>
+                <Link href={`/analytics`}>
+                  <Button variant="outline" className="gap-2">
+                    <BarChart2 className="h-4 w-4" />
+                    View Analytics
+                  </Button>
+                </Link>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Link ID</label>
+                <Input
+                  type="number"
+                  placeholder="Enter your link ID"
+                  value={linkId}
+                  onChange={(e) => setLinkId(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Target Clicks</label>
+                <Input
+                  type="number"
+                  placeholder="Enter target clicks"
+                  value={targetClicks}
+                  onChange={(e) => setTargetClicks(e.target.value)}
+                />
+              </div>
+              <Button 
+                className="w-full" 
+                onClick={handleBoost}
+                disabled={loading}
+              >
+                {loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Rocket className="h-4 w-4 mr-2" />
+                )}
+                Boost Clicks
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
     </div>
   );
 }
