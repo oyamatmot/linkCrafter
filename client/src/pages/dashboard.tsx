@@ -242,7 +242,6 @@ export default function Dashboard() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="min-w-[200px]">Link</TableHead>
-                    <TableHead className="min-w-[200px]">Custom Domain</TableHead>
                     <TableHead className="min-w-[150px]">Status</TableHead>
                     <TableHead className="w-[150px]">Actions</TableHead>
                   </TableRow>
@@ -253,20 +252,10 @@ export default function Dashboard() {
                       <TableCell className="py-1">
                         <div className="flex items-center gap-2">
                           <LinkIcon className="h-4 w-4 text-primary" />
-                          <span className="font-medium" title={link.originalUrl}>
+                          <span className="font-medium truncate max-w-[200px]" title={link.originalUrl}>
                             {link.title || `s/${link.shortCode}`}
                           </span>
                         </div>
-                      </TableCell>
-                      <TableCell className="py-1">
-                        {link.customDomain ? (
-                          <div className="flex items-center gap-2">
-                            <Globe className="h-4 w-4 text-primary" />
-                            <span className="truncate max-w-[150px]">{link.customDomain}</span>
-                          </div>
-                        ) : (
-                          <span className="text-muted-foreground text-sm">None</span>
-                        )}
                       </TableCell>
                       <TableCell className="py-1">
                         <div className="flex items-center gap-2">

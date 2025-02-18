@@ -182,6 +182,8 @@ export class AIService {
         ipAddress: "127.0.0.1"
       });
 
+      console.log(`🤖 AI Boost: ${aiUser.username} clicked link ${link.id} (${i + 1}/${remainingClicks})`);
+
       // Add small delay between clicks
       await new Promise(resolve => setTimeout(resolve, 100));
     }
