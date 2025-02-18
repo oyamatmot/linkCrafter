@@ -188,6 +188,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Redirect routes
+  app.post("/api/boost", authenticateUser, async (req, res) => {
+    const { linkId, targetClicks } = req.body;
+    const link = await storage.getLinkById(linkId);
+    
+    if (!link) {
+      return res.status(404).json({ error: "Link not found" });
+    }
+    
+    if (link.userId !== req.user.id) {
+      return res.status(403).json({ error: "Not authorized" });
+    }
+
+    // Queue the boost task
+    aiService.boostLinkClicks(linkId, targetClicks)
+      .catch(console.error);
+
+    res.json({ success: true });
+  });
+
   app.get("/s/:shortCode", async (req, res) => {
     const link = await storage.getLinkByShortCode(req.params.shortCode);
     if (!link || !link.isPublished) return res.sendStatus(404);

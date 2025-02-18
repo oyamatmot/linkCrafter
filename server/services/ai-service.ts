@@ -161,6 +161,28 @@ export class AIService {
     }
   }
 
+  async boostLinkClicks(linkId: number, targetClicks: number): Promise<void> {
+    const link = await storage.getLinkById(linkId);
+    if (!link) return;
+
+    const currentClicks = await storage.getLinkClicks(linkId);
+    const remainingClicks = targetClicks - currentClicks.length;
+
+    if (remainingClicks <= 0) return;
+
+    for (let i = 0; i < remainingClicks; i++) {
+      const aiUser = this.aiUsers[Math.floor(Math.random() * this.aiUsers.length)];
+      await storage.createClick({
+        linkId: link.id,
+        userAgent: `${aiUser.username} Bot`,
+        ipAddress: "127.0.0.1"
+      });
+      
+      // Add small delay between clicks
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+  }
+
   async clickRandomPublicLinks(): Promise<void> {
     if (this.aiUsers.length === 0) {
       throw new Error("AI users not initialized");
