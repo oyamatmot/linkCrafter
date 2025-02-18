@@ -20,9 +20,8 @@ export function ProtectedRoute({ component: Component, path }: ProtectedRoutePro
   }
 
   return (
-    <Route
-      path={path}
-      render={() => (user ? <Component /> : <Redirect to="/auth" />)}
-    />
+    <Route path={path}>
+      {user ? <Component /> : <Redirect to="/auth" />}
+    </Route>
   );
 }

@@ -55,7 +55,19 @@ import { PasswordInput } from "@/components/ui/password-input";
 
 
 export default function Dashboard() {
-  const { user, logoutMutation } = useAuth();
+  const { user, logoutMutation, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Redirect to="/auth" />;
+  }
   const { toast } = useToast();
   const [selectedLink, setSelectedLink] = useState<LinkType | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
