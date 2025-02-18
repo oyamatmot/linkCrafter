@@ -159,7 +159,7 @@ export default function AuthPage() {
                     <div className="grid grid-cols-3 gap-2">
                       <Button
                         variant="outline"
-                        onClick={() => handleSocialLogin('github')}
+                        onClick={() => navigate("/auth/github")}
                         className="w-full gap-2"
                       >
                         <SiGithub className="w-4 h-4" />
@@ -167,7 +167,7 @@ export default function AuthPage() {
                       </Button>
                       <Button
                         variant="outline"
-                        onClick={() => handleSocialLogin('google')}
+                        onClick={() => navigate("/auth/google")}
                         className="w-full gap-2"
                       >
                         <SiGoogle className="w-4 h-4" />
@@ -175,7 +175,7 @@ export default function AuthPage() {
                       </Button>
                       <Button
                         variant="outline"
-                        onClick={() => handleSocialLogin('facebook')}
+                        onClick={() => navigate("/auth/facebook")}
                         className="w-full gap-2"
                       >
                         <SiFacebook className="w-4 h-4" />

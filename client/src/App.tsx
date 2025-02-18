@@ -17,11 +17,23 @@ import Notifications from "@/pages/notifications";
 import PrivacyPolicy from "@/pages/privacy-policy";
 import TermsOfService from "@/pages/terms-of-service";
 import { ProtectedRoute } from "./lib/protected-route";
+import FacebookLoginPage from "@/pages/auth/facebook"; // Add import for Facebook login page
+import GithubLoginPage from "@/pages/auth/github";   // Add import for Github login page
+import GoogleLoginPage from "@/pages/auth/google";   // Add import for Google login page
 
 function Router() {
   return (
     <Switch>
       <Route path="/auth" component={AuthPage} />
+      <Route path="/auth/facebook">
+        <FacebookLoginPage />
+      </Route>
+      <Route path="/auth/github">
+        <GithubLoginPage />
+      </Route>
+      <Route path="/auth/google">
+        <GoogleLoginPage />
+      </Route>
       <Route path="/dashboard">
         <ProtectedRoute component={Dashboard} path="/dashboard" />
       </Route>

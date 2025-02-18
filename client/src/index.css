@@ -2,6 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
+:root[class~="dark"] {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  color-scheme: dark;
+}
+
+.dark body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+.scrollable-box {
+  max-height: 500px;
+  overflow-y: auto;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
 @layer base {
   * {
     @apply border-border;
