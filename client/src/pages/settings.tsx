@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/use-auth";
-import { Bell, Moon, Sun, Globe, Smartphone, Search, Book, Activity } from "lucide-react";
+import { Bell, Moon, LogOut, Globe, Smartphone, Search, Book, Activity } from "lucide-react";
 import { TutorialOverlay } from "@/components/tutorial-overlay";
 import { useState, useEffect } from "react";
 import { useTheme } from "@/hooks/use-theme";
@@ -14,13 +14,14 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
+import { useLocation } from "wouter";
 
 export default function SettingsPage() {
-  const { user } = useAuth();
+  const { user, logoutMutation } = useAuth();
   const [showTutorial, setShowTutorial] = useState(false);
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   const updatePreferencesMutation = useMutation({
     mutationFn: async (preferences: any) => {
@@ -41,12 +42,6 @@ export default function SettingsPage() {
       [key]: value,
     };
 
-    // Immediately update local state
-    queryClient.setQueryData(["/api/user"], (oldData: any) => ({
-      ...oldData,
-      preferences: newPreferences,
-    }));
-
     try {
       await updatePreferencesMutation.mutateAsync(newPreferences);
       if (key === "darkMode") {
@@ -59,14 +54,15 @@ export default function SettingsPage() {
         preferences: user.preferences,
       }));
     }
+  };
 
-    // Update locally first for immediate feedback
-    queryClient.setQueryData(["/api/user"], (oldData: any) => ({
-      ...oldData,
-      preferences: newPreferences,
-    }));
-
-    updatePreferencesMutation.mutate(newPreferences);
+  const handleLogout = async () => {
+    try {
+      await logoutMutation.mutateAsync();
+      setLocation('/auth');
+    } catch (error) {
+      // Error is handled by the mutation
+    }
   };
 
   useEffect(() => {
@@ -90,11 +86,26 @@ export default function SettingsPage() {
           transition={{ duration: 0.5 }}
           className="space-y-6"
         >
-          <div>
-            <h1 className="text-3xl font-bold">Settings</h1>
-            <p className="text-muted-foreground">
-              Manage your account preferences
-            </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">Settings</h1>
+              <p className="text-muted-foreground">
+                Manage your account preferences
+              </p>
+            </div>
+            <Button 
+              variant="destructive"
+              onClick={handleLogout}
+              disabled={logoutMutation.isPending}
+              className="gap-2"
+            >
+              {logoutMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <LogOut className="h-4 w-4" />
+              )}
+              Sign Out
+            </Button>
           </div>
 
           <div className="grid gap-6">
