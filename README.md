@@ -25,7 +25,7 @@ The app will be running on port 5000.
 
 ### Deploy on Replit (Recommended)
 
-[Replit](replit.com)
+[Replit](https://replit.com)
 1. Click "Deploy" in top-right corner
 2. Choose deployment type:
    - Autoscale: Best for most apps, scales with traffic
@@ -39,7 +39,7 @@ The app will be running on port 5000.
 
 ### Deploy on Render
 
-1. Go to [Render](render.com) and sign up/sign in
+1. Go to [Render](https://render.com) and sign up/sign in
 2. Create new Render account
 3. New Web Service
 4. Connect GitHub repo
@@ -51,7 +51,7 @@ The app will be running on port 5000.
 
 ### Deploy on Vercel
 
-[Vercel](vercel.com)
+[Vercel](https://vercel.com)
 1. Import GitHub repo
 2. Configure project:
    - Framework: Vite
