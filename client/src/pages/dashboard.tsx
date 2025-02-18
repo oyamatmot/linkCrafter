@@ -241,7 +241,7 @@ export default function Dashboard() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="min-w-[200px]">URL</TableHead>
+                    <TableHead className="min-w-[200px]">Link</TableHead>
                     <TableHead className="min-w-[200px]">Custom Domain</TableHead>
                     <TableHead className="min-w-[150px]">Status</TableHead>
                     <TableHead className="w-[150px]">Actions</TableHead>
@@ -249,13 +249,16 @@ export default function Dashboard() {
                 </TableHeader>
                 <TableBody>
                   {links.map((link) => (
-                    <TableRow key={link.id} className="h-12">
-                      <TableCell className="py-2">
-                        <div className="truncate max-w-[300px]" title={link.originalUrl}>
-                          {link.originalUrl}
+                    <TableRow key={link.id} className="h-10">
+                      <TableCell className="py-1">
+                        <div className="flex items-center gap-2">
+                          <LinkIcon className="h-4 w-4 text-primary" />
+                          <span className="font-medium" title={link.originalUrl}>
+                            {link.title || `s/${link.shortCode}`}
+                          </span>
                         </div>
                       </TableCell>
-                      <TableCell className="py-2">
+                      <TableCell className="py-1">
                         {link.customDomain ? (
                           <div className="flex items-center gap-2">
                             <Globe className="h-4 w-4 text-primary" />
@@ -265,7 +268,7 @@ export default function Dashboard() {
                           <span className="text-muted-foreground text-sm">None</span>
                         )}
                       </TableCell>
-                      <TableCell className="py-2">
+                      <TableCell className="py-1">
                         <div className="flex items-center gap-2">
                           {link.hasPassword ? (
                             <Lock className="h-4 w-4 text-warning" />
@@ -277,7 +280,7 @@ export default function Dashboard() {
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="py-2">
+                      <TableCell className="py-1">
                         <div className="flex items-center gap-1">
                           <Button
                             variant="ghost"
